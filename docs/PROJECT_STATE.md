@@ -1,7 +1,7 @@
 # PROJECT STATE — KING WORLD WAR
 
-**Last Updated:** Phase 01 (Unity Foundation & Core Architecture)  
-**Active Branch:** `phase-01/foundation`  
+**Last Updated:** Phase 02 (3D Visual Foundation, URP, Camera Rig, Quality Tiers)  
+**Active Branch:** `phase-02/visual-foundation`  
 **Engine:** Unity 6 (`6000.6.9f1`)  
 **Active Render Pipeline:** Universal Render Pipeline (URP 17.6.0)
 
@@ -32,15 +32,28 @@
 - Implemented `GameConfig` ScriptableObject with environment separation and safety validation.
 - Implemented `ErrorScreenView` for error handling and maintenance mode.
 - Created placeholder networking contracts (`IAuthService`, `IPlayerRepository`) with offline null implementations.
-- Executed automated tests: **17 EditMode tests passed (100%), 4 PlayMode tests passed (100%)**.
+- Executed automated tests: **17 EditMode + 4 PlayMode tests (100% pass rate)**.
+- Remediation `REV-02` (Appendix B): Added 6 isolated PlayMode unit tests for `UnitySceneLoader` error handling (**27 total tests passed, 100%**).
+
+### Phase 02 — 3D Visual Foundation, Camera Controls & Quality Tiers
+- Established official original military-modern palette in `PaletteSO` (Charcoal, Steel Gray, Muted Military Green, Restrained Gold).
+- Created pure C# camera mathematical models in `CameraMath` (XZ rectangular boundary clamping, zoom damping, pinch scaling).
+- Implemented production RTS `StrategyCameraRig` with desktop mouse and mobile multi-touch gestures, bounded pan/zoom, and UI pointer filtering.
+- Implemented `QualityService` with automatic device hardware heuristics (RAM, GPU memory, CPU cores) and persistent `PlayerPrefs` override.
+- Created 3 tuned URP assets for Low, Medium, and High quality tiers.
+- Built 5 original low-poly building prefabs (HQ, Barracks, Supply Depot, Radar Station, Vehicle Factory) and 2 unit prefabs (Tank, Aircraft).
+- Created `Assets/KINGWorldWar/Scenes/VisualTest.unity` (Build index 2) with ground terrain (120x120m), directional sunlight, base layout, camera rig, and on-screen `DebugOverlayView` (FPS, Tier, Resolution, Scale).
+- Documented `docs/ASSET_PROVENANCE.md` (100% original, $0 third-party assets) and `docs/QUALITY_TIERS.md`.
+- Automated test coverage: **33 EditMode tests + 14 PlayMode tests = 47 total tests (100% pass rate)**.
 
 ---
 
 ## 2. DECISIONS REGISTER
 
 - **ADR-0001 (Architecture & Foundation):** Established layer separation using Assembly Definitions, Composition Root pattern (`ServiceContainer`), and pure C# Core domain models.
-- **Render Pipeline:** Retained URP 17.6.0 with Mobile quality profile and FSR upscaling.
-- **Identity & Package ID:** `KING WORLD WAR`, bundle identifier `com.kingworldwar.game`.
+- **Render Pipeline:** Universal Render Pipeline (URP 17.6.0) with dedicated per-tier assets (`URP_Asset_Low`, `URP_Asset_Medium`, `URP_Asset_High`).
+- **Visual Identity:** 100% original procedural low-poly military strategy style. Official palette: Charcoal `#1F2421`, Steel Gray `#4A5568`, Muted Military Green `#3E4E3D`, Restrained Gold `#D4AF37`.
+- **Camera Controls:** Decoupled math (`CameraMath`) from MonoBehaviour rig (`StrategyCameraRig`), bounded horizontal panning and zoom heights, New Input System integration.
 - **Client Trust:** Zero authoritative logic on the client; currency and battle resolution reserved for Nakama server.
 
 ---
@@ -49,13 +62,23 @@
 
 1. **Mobile Build Support Modules:**
    - Owner needs to install **Android Build Support** (with OpenJDK/NDK) and **iOS Build Support** in Unity Hub for version `6000.6.9f1`.
-2. **Tutorial Assets Cleanup:**
-   - In a future phase, archive or delete the 154 MB `.webm` tutorial videos in `Assets/Tutorials/Media/` to reduce project size.
+2. **On-Device Profiling:**
+   - Run the on-device profiling checklist documented in `docs/QUALITY_TIERS.md` on physical target devices.
+3. **Tutorial Assets Cleanup:**
+   - Archive or delete the 154 MB `.webm` tutorial videos in `Assets/Tutorials/Media/` when convenient.
 
 ---
 
 ## 4. HOW TO RUN
 
+### Running the Visual Test Scene
+1. Open `Assets/KINGWorldWar/Scenes/VisualTest.unity`.
+2. Enter Play Mode.
+3. Use mouse drag (left, right, or middle click) to pan the camera across the tactical base.
+4. Use mouse scroll wheel to zoom in and out smoothly.
+5. Notice the on-screen debug overlay displaying live FPS, active Quality Tier, screen resolution, and render scale.
+
+### Running the Full Startup Flow
 1. Open `Assets/KINGWorldWar/Scenes/Bootstrap.unity`.
 2. Enter Play Mode.
-3. Observe successful transition to `MainMenu.unity`.
+3. Observe bootstrap validation and transition to `MainMenu.unity`.

@@ -14,6 +14,7 @@ namespace KingWorldWar.Core.Scenes
         public const string Base = "Base";
         public const string WorldMap = "WorldMap";
         public const string BattleReport = "BattleReport";
+        public const string VisualTest = "VisualTest";
 
         /// <summary>
         /// Scenes strictly required for the core application lifecycle.
@@ -26,7 +27,7 @@ namespace KingWorldWar.Core.Scenes
         /// All scenes planned in the product architecture.
         /// </summary>
         public static readonly ReadOnlyCollection<string> AllPlannedScenes = new ReadOnlyCollection<string>(
-            new[] { Bootstrap, MainMenu, Base, WorldMap, BattleReport }
+            new[] { Bootstrap, MainMenu, Base, WorldMap, BattleReport, VisualTest }
         );
 
         public static bool IsValid(string sceneName)
