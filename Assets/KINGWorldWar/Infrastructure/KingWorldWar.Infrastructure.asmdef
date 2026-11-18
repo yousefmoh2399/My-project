@@ -1,0 +1,16 @@
+{
+  "name": "KingWorldWar.Infrastructure",
+  "rootNamespace": "KingWorldWar.Infrastructure",
+  "references": [
+    "KingWorldWar.Core"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

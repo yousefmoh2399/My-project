@@ -6,6 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/KINGWorldWar/Scenes/Bootstrap.unity
+    guid: b70533cb6a66548709b8a8f3c3db2836
+  - enabled: 1
+    path: Assets/KINGWorldWar/Scenes/MainMenu.unity
+    guid: 73e118869aa0a414590190751f95f8ff
+  - enabled: 0
     path: Assets/Scenes/GetStarted_Scene.unity
     guid: 6888813f2bd9e4521b9b1343abf0c60f
   m_configObjects:
