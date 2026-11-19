@@ -1,121 +1,193 @@
-# MILESTONE REPORT — KING WORLD WAR
+# MILESTONE REPORT – KING WORLD WAR
 
-**Phase:** 06 — Army & Military Units (Recruitment, Formations, Combat Stats)  
-**Date:** 2026-11-19T12:50:00+02:00  
-**Agent:** Antigravity (Senior Unity / Backend Engineer)  
-**Branch:** `phase-06/army-units`  
-**Commit Hash:** `9413c4d44bcb9d3c0acfebfe45d7f25a9913cf05`  
-**Status:** COMPLETE / READY FOR OWNER REVIEW  
-
----
-
-## 1. EXECUTIVE SUMMARY
-
-Phase 6 implements the complete Army and Military Units subsystem for *KING WORLD WAR*. Building directly upon the foundation, tactical base grid, and bilingual localization subsystems from Phases 1–5, this phase introduces 4 foundational unit archetypes, deterministic combat stats, recruitment resource scaling, base building prerequisites, non-authoritative recruitment queues with UTC timestamp simulation, a 3D parade staging ground situated at $(400, 0, 0)$ in `MainMenu.unity`, a full-screen military command dashboard (`ArmyScreenView`), and an interactive slide-in recruitment drawer (`RecruitmentDrawer`).
-
-All 160 automated tests (110 EditMode + 50 PlayMode) pass with a 100% success rate, 0 errors, and 0 warnings. $0 was spent on third-party assets (100% original identity).
+**Phase:** 06 (Resources & Economy: Server-Authoritative Design)  
+**Status:** PASS  
+**Timestamp:** 2026-11-19  
+**Active Branch:** `phase-06/economy`  
+**Engine:** Unity 6 (`6000.6.9f1`), Universal Render Pipeline (URP 17.6.0)
 
 ---
 
-## 2. DELIVERABLES VERIFICATION
+### 1. Summary
+Phase 6 establishes the client-side economy architecture and the formal server-authoritative contract specification for KING WORLD WAR. The system manages the core tri-resource economy: **Gold, Oil, and Iron**, with strictly $0 cost in third-party assets and zero monetization mechanics. 
 
-| Deliverable | Status | Verification Evidence |
-|---|---|---|
-| **Core Domain (`KingWorldWar.Core.Army`)** | Verified | `UnitType` (4 archetypes), `UnitId`, `UnitStats`, `UnitCost`, `UnitDefinition`, `RecruitmentQueueItem`, `ArmyRoster`, and interfaces (`IArmyDataSource`, `IArmyStateRepository`, `IArmyService`). |
-| **Combat Stats & Formulas** | Verified | Auto-calculated Combat Power ($\text{Atk} \times 2 + \text{Def} \times 2 + \lfloor\text{HP} / 5\rfloor$). Verified in `ArmyDataTests.cs`. |
-| **Recruitment Cost & Duration** | Verified | Gold, Oil, Iron costs and recruitment durations in seconds. Batch multiplication tested in `ArmyDataTests.UnitCost_Multiply_ScalesAccurately`. |
-| **Building Prerequisites** | Verified | Infantry (Barracks Lv1), Recon (Barracks Lv2), Tank (Factory Lv1), Artillery (Factory Lv2). Validated against `IBaseStateRepository` in `ArmyServiceTests.cs`. |
-| **Standing Roster & Total Power** | Verified | `ArmyRoster` aggregates mobilized troop counts and evaluates total combat power rating dynamically across army data sources. |
-| **3D Army View & Staging Ground** | Verified | `PlayerArmyView` situated at $(400, 0, 0)$ in `MainMenu.unity`. Spawns all 4 archetypes with selection rings and world-space countdown billboards. Verified in `ArmyInteractionTests.cs`. |
-| **UI Army Screen & Recruitment Drawer** | Verified | `ArmyScreenView` (replaces placeholder for `ScreenId.Army`) with combat power badge, forces count, operations count, and 4 unit cards. `RecruitmentDrawer` with stepper, cost breakdown, progress bar, countdown, and cancel modal. |
-| **Bilingual Localization** | Verified | 30+ string keys in Arabic and English with 100% strict key parity. Verified in `ArmyLocalizationTests.cs`. |
-| **Documentation** | Verified | `docs/army/ARMY_UNITS_SPEC.md`, `docs/army/ADDING_UNITS.md`, `docs/PROJECT_STATE.md`, `docs/localization/REVIEW_QUEUE.md`. |
-| **Automated Tests** | Verified | 110 EditMode + 50 PlayMode = 160 total automated tests passing (100% pass rate). |
+All mutations conform to the Untrusted Client mandate: client values are non-authoritative presentation caches. The approved continuous accrual model is implemented: resources accumulate continuously based on server timestamp offsets and hourly yield rates, capped at maximum storage capacity without manual collection friction. An isolated development mock (`LocalMockEconomyRepository`) simulates server latency, optimistic concurrency checks (`STALE_VERSION`), idempotency key caching, and insufficient balance rejection. 
+
+The UI features culture-aware tactical number formatting (K/M abbreviations using floor rounding), threshold color alerts (Zero, Normal, NearCap $\ge 90\%$, Capped $100\%$, Stale), an interactive `EconomyDetailDrawer`, and direct integration with Phase 5's `BuildingDetailDrawer` to display upgrade affordability and exact resource shortfalls.
+
+Automated verification achieved a **100% pass rate across 195 test cases (141 EditMode, 54 PlayMode)** with 0 compile errors and 0 warnings.
 
 ---
 
-## 3. UNTRUSTED CLIENT & SECURITY AUDIT
+### 2. Implemented Features
 
-In strict compliance with **Non-Negotiable Rule #4** ("Untrusted Client") and **Rule #5** ("No Direct DB Access"):
-1. **Zero Database Connections:** Unity contains 0 references to PostgreSQL, Npgsql, or database sockets.
-2. **Client-Side Simulation Explicitly Bound:** All recruitment operations, resource deductions, and troop counts are local simulated states. Server-authoritative RPCs (`RecruitUnitsRpc`, `CancelRecruitmentRpc`, `GetRosterRpc`) will be implemented in Nakama in Phase 8/9.
-3. **UTC Timestamps:** All queue timers calculate elapsed time and completion exclusively via `DateTime.UtcNow` intervals, preventing frame-rate dependence and device clock manipulation.
-4. **Prerequisite Enforcement:** The client pre-validates base building level requirements via `IBaseStateRepository` before enqueueing, and the server will replicate this identical check inside Nakama transactions.
+1. **Culture-Aware Military Resource Formatter (`ResourceFormatter`):**
+   - Tactical abbreviation: `< 1,000` full integer, `1,000 - 999,999` with `K` suffix (e.g. `1.25K`), `>= 1,000,000` with `M` suffix (e.g. `3.4M`), `>= 1,000,000,000` with `B` suffix.
+   - Floor rounding: values are strictly floored to 2 decimal places to ensure the client never displays more resources than the authoritative server balance.
+   - Large-number safety: built on signed 64-bit integers (`long`), protecting against arithmetic overflow even at `long.MaxValue`.
+   - Visual alert state evaluation: classifies status into `Zero` (muted gray), `Normal` (gold/white), `NearCap` ($\ge 90\%$ amber), `Capped` ($100\%$ red), and `Stale` (amber).
+   - Time-to-full formatting: calculates human-readable duration until storage capacity is reached.
 
----
+2. **Immutable Domain Models & Continuous Accrual Math (`KingWorldWar.Core.Economy`):**
+   - `ResourceType`: Enum defining `Gold = 1`, `Oil = 2`, `Iron = 3`.
+   - `ResourceAmount`: Immutable `readonly struct` with overflow-checked operations (`Add`, `Subtract`, `Multiply`).
+   - `StorageCapacity`: Immutable `readonly struct` defining individual storage caps for Gold, Oil, Iron.
+   - `ResourceYieldRate`: Immutable `readonly struct` defining production rates per hour.
+   - `EconomySnapshot`: Immutable server-authoritative snapshot. Implements `CalculateProjection(targetUtc)`:
+     $$\text{Accrued} = \min\left(\text{Cap} - \text{Balance}, \left\lfloor \frac{\Delta t \times \text{RatePerHour}}{3600} \right\rfloor\right)$$
+   - `TransactionResult`: Immutable transaction receipt with `TransactionId`, `RequestId`, server timestamp, error code, and authoritative snapshot.
+   - Data validation: `EconomySnapshot.Validate()` rejects negative balances, negative revisions, or default timestamps.
 
-## 4. TESTS & VERIFICATION RESULTS
+3. **Client Architecture & Zero Write Path:**
+   - Client code has **zero write paths** to alter wallet balances. Verified by reflection unit tests asserting absence of public setters or mutating methods on balance models.
+   - `IEconomyService` and `EconomyService`: manages authoritative snapshots, maintains estimated server time offset (`ServerTimeOffset`), drives real-time projection ticks, and routes mutations to `IEconomyRepository`.
+   - Seamless backward compatibility: `EconomyService` implements both `IEconomyService` and `IResourceState`.
 
-### Test Summary:
-- **EditMode Tests:** 110 passed, 0 failed (100%)
-- **PlayMode Tests:** 50 passed, 0 failed (100%)
-- **Total Automated Tests:** 160 passed out of 160 (100% pass rate)
+4. **Development Mock Repository (`LocalMockEconomyRepository`):**
+   - Guarded by `#if UNITY_EDITOR || DEBUG || UNITY_INCLUDE_TESTS`.
+   - Simulates realistic async network latency (configurable, 20ms default).
+   - Idempotency simulation: caches `requestId` -> `TransactionResult`. Replay requests return the original result without duplicate deductions.
+   - Optimistic concurrency simulation: enforces `expectedVersion == snapshotVersion`; returns `STALE_VERSION` on version drift.
+   - Balance validation: returns `INSUFFICIENT_RESOURCES` with exact shortfall breakdown.
 
-### New Phase 6 Tests:
-1. `KingWorldWar.Tests.EditMode.ArmyDataTests`:
-   - `UnitId_Default_EqualsEmpty` (Passed)
-   - `UnitId_NonEmpty_StoresNormalizedValue` (Passed)
-   - `DefaultArmyConfig_ContainsAllFourArchetypes` (Passed)
-   - `UnitDefinitions_Prerequisites_AreCorrect` (Passed)
-   - `UnitCost_Multiply_ScalesAccurately` (Passed)
-   - `UnitStats_AutoCalculatesCombatPower` (Passed)
-   - `RecruitmentQueueItem_ProgressAndTimers_CalculateCorrectly` (Passed)
-   - `ArmyRoster_AddRemoveAndTotalPower_BehaveExpectedly` (Passed)
-2. `KingWorldWar.Tests.EditMode.ArmyServiceTests`:
-   - `RequestRecruitment_Valid_ReturnsOkAndEnqueues` (Passed)
-   - `RequestRecruitment_InvalidCount_Fails` (Passed)
-   - `RequestRecruitment_ExceedsMaxQueues_Fails` (Passed)
-   - `RequestRecruitment_PrerequisiteNotMet_Fails` (Passed)
-   - `RequestRecruitment_PrerequisiteSatisfied_Succeeds` (Passed)
-   - `CancelRecruitment_Existing_RemovesQueue` (Passed)
-   - `CancelRecruitment_NonExisting_Fails` (Passed)
-   - `CheckCompletedRecruitments_ElapsedQueue_AddsUnitsToRoster` (Passed)
-3. `KingWorldWar.Tests.EditMode.ArmyLocalizationTests`:
-   - `StringTables_StrictKeyParity_ArmyKeys` (Passed)
-   - `AllUnitDefinitions_HaveValidLocalization` (Passed)
-   - `ArmyDrawerAndScreenKeys_ResolveInBothLanguages` (Passed)
-4. `KingWorldWar.Tests.PlayMode.ArmyInteractionTests`:
-   - `PlayerArmyView_SpawnsAllFourArchetypes` (Passed)
-   - `PlayerArmyView_SelectUnit_UpdatesSelectionAndFocusesCamera` (Passed)
-   - `PlayerArmyView_Deselect_ClearsSelection` (Passed)
-   - `PlayerArmyView_RaycastSelectsClickedUnit` (Passed)
-   - `PlayerArmyView_RaycastEmpty_Deselects` (Passed)
-   - `RecruitmentDrawer_DisplaysCorrectUnitDetails` (Passed)
-   - `RecruitmentDrawer_QuantityStepper_ModifiesQuantityAndCost` (Passed)
-   - `RecruitmentDrawer_RecruitButton_InitiatesRecruitment` (Passed)
-   - `RecruitmentDrawer_CloseButton_HidesDrawer` (Passed)
-   - `RecruitmentDrawer_LanguageToggle_UpdatesTextInRealTime` (Passed)
-5. `KingWorldWar.Tests.PlayMode.BootstrapFlowTests`:
-   - Validated that `IArmyDataSource`, `IArmyStateRepository`, and `IArmyService` are correctly registered in the composition root during startup.
+5. **Server Contract Specification (`docs/api/economy-contract.md`):**
+   - Comprehensive Nakama server runtime and PostgreSQL contract specification.
+   - Endpoints: `kww.economy.get_snapshot` and `kww.base.upgrade.request` (spend).
+   - Explicit architectural explanation for excluding manual `economy.collect` (continuous passive accrual chosen).
+   - Database schema: `player_wallets`, append-only `resource_ledger`, and `idempotency_records`.
+   - Structured error codes, rate limiting, and anti-cheat policies.
+
+6. **UI Presentation & Integration:**
+   - `ResourceHeaderView`: Upgraded to bind to `IEconomyService`, displaying live abbreviations, near-cap warning colors, and header button to open economy details.
+   - `EconomyDetailDrawer`: Slide-in panel displaying per-resource balances, hourly rates, progress bars to capacity, time-to-full estimates, explicit estimation disclaimer, and mock data badge.
+   - `BuildingDetailDrawer` Integration: Checks affordability via `_economyService.CanAfford()`. When resources are insufficient, missing costs are highlighted in red, shortfall is calculated, and the Upgrade button is disabled.
+
+7. **Bilingual Military Localization:**
+   - 100% strict key parity in Arabic RTL and English for all 18 economy keys in `DefaultStringTables.cs` (resources, rates, capacities, time-to-full, shortfalls, status badges).
 
 ---
 
-## 5. ASSET & THIRD-PARTY AUDIT
-
-- **Third-Party Asset Expenditure:** $0.00 (Zero paid or external assets used).
-- **Asset Provenance:** Procedural meshes and native UGUI shapes built using original code.
-- **Copyright Compliance:** No Warpath or third-party assets, trademarks, or proprietary naming conventions used.
+### 3. Files Created
+1. `Assets/KINGWorldWar/Core/Economy/ResourceType.cs`
+2. `Assets/KINGWorldWar/Core/Economy/ResourceAmount.cs`
+3. `Assets/KINGWorldWar/Core/Economy/StorageCapacity.cs`
+4. `Assets/KINGWorldWar/Core/Economy/ResourceYieldRate.cs`
+5. `Assets/KINGWorldWar/Core/Economy/EconomySnapshot.cs`
+6. `Assets/KINGWorldWar/Core/Economy/TransactionResult.cs`
+7. `Assets/KINGWorldWar/Core/Economy/ResourceFormatter.cs`
+8. `Assets/KINGWorldWar/Core/Economy/IEconomyRepository.cs`
+9. `Assets/KINGWorldWar/Core/Economy/IEconomyService.cs`
+10. `Assets/KINGWorldWar/Infrastructure/Economy/EconomyConfigSO.cs`
+11. `Assets/KINGWorldWar/Infrastructure/Economy/LocalMockEconomyRepository.cs`
+12. `Assets/KINGWorldWar/Infrastructure/Economy/EconomyService.cs`
+13. `Assets/KINGWorldWar/UI/Economy/EconomyDetailDrawer.cs`
+14. `docs/api/economy-contract.md`
+15. `Assets/KINGWorldWar/Tests/EditMode/ResourceFormatterTests.cs`
+16. `Assets/KINGWorldWar/Tests/EditMode/EconomySnapshotTests.cs`
+17. `Assets/KINGWorldWar/Tests/EditMode/EconomyRepositoryTests.cs`
+18. `Assets/KINGWorldWar/Tests/EditMode/EconomyLocalizationTests.cs`
+19. `Assets/KINGWorldWar/Tests/PlayMode/EconomyUITests.cs`
+20. `docs/reports/phase-06-report.md`
 
 ---
 
-## 6. LOCALIZATION REPORT
-
-- **Languages Supported:** English and Arabic (RTL with contextual shaping and BiDi numbers).
-- **String Table Parity:** 100% (0 missing keys across English and Arabic dictionaries).
-- **Human Review Status:** All 30+ Phase 6 Arabic terms cataloged in `docs/localization/REVIEW_QUEUE.md` flagged as `Needs Human Review`.
-
----
-
-## 7. KNOWN LIMITATIONS & TECHNICAL DEBT
-
-1. **Client Simulation Only:** As scheduled, recruitment queues and standing troop inventories are simulated locally in-memory. Full Nakama backend integration (RPCs + PostgreSQL) is scheduled for Phase 8.
-2. **Procedural Placeholder Visuals:** Unit models on the $(400, 0, 0)$ staging ground utilize procedural geometric primitives. Higher-fidelity original 3D meshes can be dropped in during the Art pass without altering gameplay or domain logic.
-3. **Queue Limit Fixed at 2:** Concurrent recruitment queue capacity is currently capped at 2. Future VIP or technology tree bonuses can expand this dynamically via `IArmyStateRepository.MaxConcurrentQueues`.
+### 4. Files Modified
+1. `Assets/KINGWorldWar/Core/Common/GameError.cs` (Added `InvalidPayload`, `DuplicateRequest`, `StaleVersion`, `RateLimited` factory methods)
+2. `Assets/KINGWorldWar/Infrastructure/Base/LocalMockBaseRepository.cs` (Updated preprocessor guards to prevent UAC0009 warnings)
+3. `Assets/KINGWorldWar/Infrastructure/Localization/DefaultStringTables.cs` (Added 18 bilingual EN/AR economy string keys)
+4. `Assets/KINGWorldWar/UI/Common/ResourceHeaderView.cs` (Upgraded to bind to `IEconomyService` with threshold coloring and click event)
+5. `Assets/KINGWorldWar/UI/Base/BuildingDetailDrawer.cs` (Integrated affordability checks, shortfall highlighting, and upgrade button gating)
+6. `Assets/KINGWorldWar/App/GameBootstrap.cs` (Registered economy services and config in `ServiceContainer`)
+7. `Assets/KINGWorldWar/App/MainMenuScope.cs` (Wired economy services, `ResourceHeaderView`, and `EconomyDetailDrawer`)
+8. `docs/PROJECT_STATE.md` (Updated project milestone state)
 
 ---
 
-## 8. NEXT RECOMMENDED PHASE
+### 5. Packages Added / Updated
+- **None (0 packages added or updated).** System uses existing Unity 6 URP, UGUI, TextMeshPro, and C# standard libraries. Total third-party asset cost: **$0.00**.
 
-**Phase 07 — Alliances & Coalition Systems (Guilds, Shared Tech, Alliance Chat Placeholder)**
-- Branch: `phase-07/alliance-systems`
-- Scope: Alliance domain models (Roles, Permissions, Member Roster), Coalition Creation & Search UI, Alliance Help/Speed-up mechanics for building & recruitment, and Alliance Territory Influence models.
+---
+
+### 6. Tests Executed
+1. **EditMode Suite (`unity command --pid 33614 test run --mode editmode --async-tests true`):**
+   - `ResourceFormatterTests`: 13 tests (0, negatives, under-1000, K-suffix, M-suffix, max long safety, exact formatting, near-cap, capped, stale, time-to-full).
+   - `EconomySnapshotTests`: 7 tests (continuous accrual projection, cap clamping, past/same timestamp, negative balance rejection, default timestamp rejection, affordability & shortfalls, reflection immutability / no-write-path check).
+   - `EconomyRepositoryTests`: 6 tests (initial snapshot mock isolation, valid spend debit & version increment, duplicate request idempotency without double spend, insufficient resources failure, stale version conflict failure, economy service projection and can-afford integration).
+   - `EconomyLocalizationTests`: 1 test (verified strict key parity and non-empty translations for all 18 economy keys).
+   - Previous Core, Infrastructure, Base, Army, WorldMap suites: 114 tests.
+   - Total EditMode: **141 tests executed (100% pass rate, 0 failed, 0 errors)**.
+
+2. **PlayMode Suite (`unity command --pid 33614 test run --mode playmode --async-tests true`):**
+   - `EconomyUITests`: 4 tests:
+     * `ResourceHeaderView_BindsEconomyService_DisplaysFormattedAmounts` [PASS]
+     * `ResourceHeaderView_NearCap_AppliesWarningColor` [PASS]
+     * `EconomyDetailDrawer_OpenAndClose_TogglesVisibility` [PASS]
+     * `BuildingDetailDrawer_WithEconomyService_ChecksAffordability` (verifies upgrade button disabled and cost colored red when balance insufficient) [PASS]
+   - Previous Base, Army, WorldMap, Navigation, Camera, SceneLoader suites: 50 tests.
+   - Total PlayMode: **54 tests executed (100% pass rate, 0 failed, 0 errors)**.
+
+---
+
+### 7. Test Results
+- **EditMode:** 141 passed, 0 failed, 0 skipped (Duration: 5.03s).
+- **PlayMode:** 54 passed, 0 failed, 0 skipped (Duration: 13.06s).
+- **Grand Total:** **195 / 195 automated tests passed (100% pass rate, 0 errors, 0 warnings).**
+
+---
+
+### 8. Unity Compile / Build Result
+- **Unity 6 (6000.6.9f1) Editor Phase:** `ready` (Endpoint `127.0.0.1:49669`).
+- `UnityEditor.EditorUtility.scriptCompilationFailed`: **`false`**.
+- Compilation result: **0 errors, 0 warnings**.
+
+---
+
+### 9. Backend & Security Checks
+- **Untrusted Client Compliance:** Verified. Client contains zero write paths to mutate balances directly.
+- **Reflection Immutability Test:** Passed. `EconomySnapshot` and `ResourceAmount` verified to have zero public setters.
+- **Zero Database Access:** Unity client contains no PostgreSQL driver or direct database connections.
+- **Idempotency Verified:** Duplicate spend requests with identical UUIDv4 `requestId` return cached original transactions without re-deducting balances.
+- **Optimistic Concurrency:** Verified. Mutations against outdated revisions fail with `STALE_VERSION`.
+
+---
+
+### 10. Acceptance Criteria Evidence Table
+
+| # | Acceptance Criterion | Status | Evidence & Implementation Details |
+|---|---|---|---|
+| **AC-1** | UI renders mock snapshots and any snapshot-shaped response | **PASS** | `ResourceHeaderView` and `EconomyDetailDrawer` bind to `IEconomyService` and render snapshots dynamically. Verified by `ResourceHeaderView_BindsEconomyService_DisplaysFormattedAmounts` and `EconomyDetailDrawer_OpenAndClose_TogglesVisibility`. |
+| **AC-2** | Client cannot set arbitrary resource balances (absence of write path) | **PASS** | `EconomySnapshot` and `ResourceAmount` are immutable structs/classes. Verified by `EconomySnapshotTests.Immutability_SnapshotAndResourceAmount_HaveNoPublicSetters_ClientHasNoWritePath`. |
+| **AC-3** | Formatting and invalid-response tests pass, including negative cases | **PASS** | 13 `ResourceFormatterTests` (0, 999, 1K, 1M, max long, negatives) and `EconomySnapshot.Validate` negative payload rejection tests passed. |
+| **AC-4** | Resource formulas documented as proposed configuration | **PASS** | `EconomyConfigSO` provides 10-level data-driven curves for storage caps and production rates. Documented in `docs/api/economy-contract.md`. |
+| **AC-5** | Economy contract document complete with idempotency and atomicity | **PASS** | [`docs/api/economy-contract.md`](file:///Users/yousef/Desktop/My%20project/docs/api/economy-contract.md) created specifying schemas, error codes, UUIDv4 idempotency, and PostgreSQL atomic transactions. |
+| **AC-6** | Compiles clean; Arabic/English verified; mock excluded from release | **PASS** | 0 compile errors; 18 bilingual keys verified by `EconomyLocalizationTests`; `LocalMockEconomyRepository` isolated behind preprocessor directives. |
+
+---
+
+### 11. Known Issues and Limitations
+1. **Development Mock Simulation:** Live network synchronization with the Nakama server runtime will be connected in Phase 8; currently, mutations execute against `LocalMockEconomyRepository`.
+2. **Offline Accrual Bounds:** The continuous accrual formula estimates offline production based on local clock offset; in Phase 8, the Nakama server will authoritatively calculate elapsed time using server-side timestamps upon reconnection.
+
+---
+
+### 12. Manual Steps Required from Owner
+- None. All automated test suites execute via the Unity CLI pipeline and achieve a 100% pass rate.
+
+---
+
+### 13. Git Branch and Commit
+- **Branch:** `phase-06/economy`
+- **Commit:** (Will be committed upon final staging)
+
+---
+
+### 14. Recommended Next Task
+**Proceed to Phase 7: Alliances & Coalition Systems.**
+- Design alliance domain structures (`AllianceId`, `AllianceProfile`, `AllianceMember`, `AllianceRole`).
+- Implement alliance creation, membership workflows, permission hierarchies, and directory search.
+- Implement coalition public profiles and bilingual localization.
+
+---
+
+### 15. Approval Required Before Proceeding
+- Approval required from owner before merging and starting Phase 7.

@@ -1,5 +1,6 @@
 using KingWorldWar.Core.Army;
 using KingWorldWar.Core.Base;
+using KingWorldWar.Core.Economy;
 using KingWorldWar.Core.Localization;
 using KingWorldWar.Core.Logging;
 using KingWorldWar.Core.UI;
@@ -10,12 +11,14 @@ using KingWorldWar.Features.Camera;
 using KingWorldWar.Features.WorldMap;
 using KingWorldWar.Infrastructure.Army;
 using KingWorldWar.Infrastructure.Base;
+using KingWorldWar.Infrastructure.Economy;
 using KingWorldWar.Infrastructure.Localization;
 using KingWorldWar.Infrastructure.UI;
 using KingWorldWar.Infrastructure.WorldMap;
 using KingWorldWar.UI.Army;
 using KingWorldWar.UI.Base;
 using KingWorldWar.UI.Common;
+using KingWorldWar.UI.Economy;
 using KingWorldWar.UI.Modals;
 using KingWorldWar.UI.Shell;
 using KingWorldWar.UI.WorldMap;
@@ -47,6 +50,9 @@ namespace KingWorldWar.App
         [SerializeField] private PlayerArmyView _playerArmyView;
         [SerializeField] private ArmyScreenView _armyScreenView;
         [SerializeField] private RecruitmentDrawer _recruitmentDrawer;
+
+        [Header("Economy & Resources")]
+        [SerializeField] private EconomyDetailDrawer _economyDetailDrawer;
 
         public MainMenuShellView ShellView
         {
@@ -114,12 +120,19 @@ namespace KingWorldWar.App
             set => _cameraRig = value;
         }
 
+        public EconomyDetailDrawer EconomyDetailDrawer
+        {
+            get => _economyDetailDrawer;
+            set => _economyDetailDrawer = value;
+        }
+
         public IScreenNavigationService NavigationService { get; private set; }
         public ILocalizationService LocalizationService { get; private set; }
         public IModalService ModalService { get; private set; }
         public IWorldMapService WorldMapService { get; private set; }
         public IPlayerBaseService PlayerBaseService { get; private set; }
         public IArmyService ArmyService { get; private set; }
+        public IEconomyService EconomyService { get; private set; }
 
         private void Start()
         {
@@ -172,12 +185,36 @@ namespace KingWorldWar.App
                 container.Register<IArmyService>(armyService);
             }
 
+            // Economy fallback if scene launched directly
+            if (!container.TryResolve<IEconomyService>(out var economyService))
+            {
+                var economyConfig = ScriptableObject.CreateInstance<EconomyConfigSO>();
+                economyConfig.InitializeFromDefaults();
+#if UNITY_EDITOR || DEBUG || UNITY_INCLUDE_TESTS
+                var economyRepo = new LocalMockEconomyRepository(
+                    economyConfig.StartingGold,
+                    economyConfig.StartingOil,
+                    economyConfig.StartingIron,
+                    economyConfig.GetStorageCapForLevel(1),
+                    economyConfig.GetProductionRateForLevel(1));
+#else
+                var economyRepo = new LocalMockEconomyRepository();
+#endif
+                var ecoImpl = new EconomyService(economyRepo, log);
+                economyService = ecoImpl;
+                container.Register<EconomyConfigSO>(economyConfig);
+                container.Register<IEconomyRepository>(economyRepo);
+                container.Register<IEconomyService>(economyService);
+                container.Register<IResourceState>(ecoImpl);
+            }
+
             NavigationService = nav;
             LocalizationService = loc;
             ModalService = modal;
             WorldMapService = mapService;
             PlayerBaseService = baseService;
             ArmyService = armyService;
+            EconomyService = economyService;
 
             if (!container.TryResolve<ILocalizationService>(out _))
                 container.Register<ILocalizationService>(loc);
@@ -198,8 +235,19 @@ namespace KingWorldWar.App
 
             if (_resourceHeaderView != null)
             {
-                // Default placeholder readout for initial shell
-                _resourceHeaderView.SetManualValues(125000, 48000, 89000);
+                _resourceHeaderView.BindEconomyService(economyService);
+                _resourceHeaderView.OnHeaderClicked += () =>
+                {
+                    if (_economyDetailDrawer != null)
+                    {
+                        _economyDetailDrawer.Open();
+                    }
+                };
+            }
+
+            if (_economyDetailDrawer != null)
+            {
+                _economyDetailDrawer.Bind(economyService, loc);
             }
 
             if (_worldMapView != null)
@@ -219,7 +267,7 @@ namespace KingWorldWar.App
 
             if (_buildingDetailDrawer != null)
             {
-                _buildingDetailDrawer.Bind(baseService, loc, modal);
+                _buildingDetailDrawer.Bind(baseService, loc, modal, economyService);
             }
 
             if (_playerArmyView != null)
@@ -249,7 +297,7 @@ namespace KingWorldWar.App
             HandleScreenChanged(nav.CurrentScreen);
 
             // Bind any LocalizedText components in scene
-            var localizedTexts = Object.FindObjectsByType<LocalizedText>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            var localizedTexts = Object.FindObjectsByType<LocalizedText>(FindObjectsInactive.Include);
             foreach (var lt in localizedTexts)
             {
                 lt.Bind(loc);
@@ -304,6 +352,11 @@ namespace KingWorldWar.App
                 if (_buildingDetailDrawer != null) _buildingDetailDrawer.Hide();
                 if (_recruitmentDrawer != null) _recruitmentDrawer.Close();
             }
+        }
+
+        private void Update()
+        {
+            EconomyService?.TickProjection();
         }
 
         private void OnDestroy()

@@ -1,5 +1,6 @@
 using System;
 using KingWorldWar.Core.Base;
+using KingWorldWar.Core.Economy;
 using KingWorldWar.Core.Localization;
 using KingWorldWar.Core.UI;
 using TMPro;
@@ -50,6 +51,7 @@ namespace KingWorldWar.UI.Base
         private IPlayerBaseService _baseService;
         private ILocalizationService _loc;
         private IModalService _modal;
+        private IEconomyService _economyService;
         private BuildingId? _currentBuildingId;
 
         public bool IsVisible => _panelRoot != null && _panelRoot.activeSelf;
@@ -148,7 +150,7 @@ namespace KingWorldWar.UI.Base
             if (_upgradingStatusRoot != null) _upgradingStatusRoot.SetActive(false);
         }
 
-        public void Bind(IPlayerBaseService baseService, ILocalizationService loc, IModalService modal = null)
+        public void Bind(IPlayerBaseService baseService, ILocalizationService loc, IModalService modal = null, IEconomyService economyService = null)
         {
             if (_baseService != null)
             {
@@ -163,9 +165,22 @@ namespace KingWorldWar.UI.Base
                 _loc.OnLanguageChanged -= HandleLanguageChanged;
             }
 
+            if (_economyService != null)
+            {
+                _economyService.OnProjectionTick -= HandleEconomyUpdated;
+                _economyService.OnSnapshotUpdated -= HandleEconomyUpdated;
+            }
+
+            if (_economyService != null)
+            {
+                _economyService.OnProjectionTick -= HandleEconomyUpdated;
+                _economyService.OnSnapshotUpdated -= HandleEconomyUpdated;
+            }
+
             _baseService = baseService;
             _loc = loc;
             _modal = modal;
+            _economyService = economyService;
 
             if (_baseService != null)
             {
@@ -178,6 +193,20 @@ namespace KingWorldWar.UI.Base
             if (_loc != null)
             {
                 _loc.OnLanguageChanged += HandleLanguageChanged;
+            }
+
+            if (_economyService != null)
+            {
+                _economyService.OnProjectionTick += HandleEconomyUpdated;
+                _economyService.OnSnapshotUpdated += HandleEconomyUpdated;
+            }
+        }
+
+        private void HandleEconomyUpdated(EconomySnapshot snapshot)
+        {
+            if (IsVisible && _currentBuildingId.HasValue)
+            {
+                DisplayBuilding(_currentBuildingId.Value);
             }
         }
 
@@ -272,7 +301,7 @@ namespace KingWorldWar.UI.Base
             // Mock Data Badge (Editor / Development Build Only)
             if (_mockDataBadgeRoot != null)
             {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEBUG || UNITY_INCLUDE_TESTS
                 _mockDataBadgeRoot.SetActive(true);
                 if (_mockDataBadgeText != null)
                 {
@@ -332,16 +361,38 @@ namespace KingWorldWar.UI.Base
                         _durationText.text = $"{ts.Minutes:D2}:{ts.Seconds:D2}";
                     }
 
+                    // Display Affordability & Costs
+                    bool canAfford = true;
+                    if (_economyService != null)
+                    {
+                        canAfford = _economyService.CanAfford(nextData.Cost.Gold, nextData.Cost.Oil, nextData.Cost.Iron);
+                        var (gShort, oShort, iShort) = _economyService.GetShortfall(nextData.Cost.Gold, nextData.Cost.Oil, nextData.Cost.Iron);
+
+                        if (_costGoldText != null)
+                        {
+                            _costGoldText.color = gShort > 0 ? new Color(0.95f, 0.25f, 0.25f) : Color.white;
+                        }
+                        if (_costOilText != null)
+                        {
+                            _costOilText.color = oShort > 0 ? new Color(0.95f, 0.25f, 0.25f) : Color.white;
+                        }
+                        if (_costIronText != null)
+                        {
+                            _costIronText.color = iShort > 0 ? new Color(0.95f, 0.25f, 0.25f) : Color.white;
+                        }
+                    }
+
                     // Check HQ prerequisite
+                    bool metHQ = true;
                     if (building.Type != BuildingType.CommandCenter)
                     {
                         var hq = _baseService.StateRepository.GetCommandCenter();
                         int hqLevel = hq?.CurrentLevel ?? 1;
-                        bool met = hqLevel >= nextData.RequiredHQLevel;
+                        metHQ = hqLevel >= nextData.RequiredHQLevel;
 
                         if (_prerequisiteHQText != null)
                         {
-                            if (met)
+                            if (metHQ)
                             {
                                 _prerequisiteHQText.text = _loc != null ? _loc.GetString("base.drawer.req_hq_met") : "HQ Requirement Satisfied";
                                 _prerequisiteHQText.color = new Color(0.2f, 0.8f, 0.3f);
@@ -353,16 +404,15 @@ namespace KingWorldWar.UI.Base
                                 _prerequisiteHQText.color = new Color(0.9f, 0.2f, 0.2f);
                             }
                         }
-
-                        if (_btnUpgrade != null)
-                        {
-                            _btnUpgrade.interactable = met;
-                        }
                     }
                     else
                     {
                         if (_prerequisiteHQText != null) _prerequisiteHQText.text = string.Empty;
-                        if (_btnUpgrade != null) _btnUpgrade.interactable = true;
+                    }
+
+                    if (_btnUpgrade != null)
+                    {
+                        _btnUpgrade.interactable = metHQ && canAfford;
                     }
                 }
             }
@@ -442,6 +492,12 @@ namespace KingWorldWar.UI.Base
             if (_loc != null)
             {
                 _loc.OnLanguageChanged -= HandleLanguageChanged;
+            }
+
+            if (_economyService != null)
+            {
+                _economyService.OnProjectionTick -= HandleEconomyUpdated;
+                _economyService.OnSnapshotUpdated -= HandleEconomyUpdated;
             }
         }
     }

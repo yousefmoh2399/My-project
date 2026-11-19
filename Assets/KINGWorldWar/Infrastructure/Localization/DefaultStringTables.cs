@@ -247,7 +247,28 @@ namespace KingWorldWar.Infrastructure.Localization
             { "army.drawer.time_remaining", "Time Remaining: {0}" },
             { "army.drawer.queue_full", "Training Queue Maximum Capacity Reached" },
             { "army.cancel_dialog.title", "Abort Mobilization" },
-            { "army.cancel_dialog.msg", "Are you sure you want to cancel troop recruitment? Resources will be refunded." }
+            { "army.cancel_dialog.msg", "Are you sure you want to cancel troop recruitment? Resources will be refunded." },
+
+            // Economy & Resources
+            { "res.gold", "Gold" },
+            { "res.oil", "Oil" },
+            { "res.iron", "Iron" },
+            { "res.rate_per_hour", "+{0}/hr" },
+            { "res.capacity", "Capacity: {0} / {1}" },
+            { "res.time_to_full", "Full in: {0}" },
+            { "res.projection_estimate", "* Continuous estimate" },
+            { "res.shortfall", "Shortfall: {0}" },
+            { "res.status.normal", "Normal" },
+            { "res.status.near_cap", "Near Capacity (90%+)" },
+            { "res.status.capped", "Storage Full" },
+            { "res.status.stale", "Syncing with Server..." },
+            { "res.drawer.title", "Resource Economy & Production" },
+            { "res.drawer.rates_header", "Hourly Production Rates" },
+            { "res.drawer.caps_header", "Storage Limits & Vaults" },
+            { "res.drawer.btn_refresh", "Synchronize" },
+            { "res.insufficient.gold", "Insufficient Gold (Need {0} more)" },
+            { "res.insufficient.oil", "Insufficient Oil (Need {0} more)" },
+            { "res.insufficient.iron", "Insufficient Iron (Need {0} more)" }
         };
 
         public static readonly Dictionary<string, string> ArabicTable = new Dictionary<string, string>
@@ -483,7 +504,28 @@ namespace KingWorldWar.Infrastructure.Localization
             { "army.drawer.time_remaining", "الوقت المتبقي: {0}" },
             { "army.drawer.queue_full", "طاقة طابور التدريب بلغت الحد الأقصى" },
             { "army.cancel_dialog.title", "إلغاء أمر التعبئة" },
-            { "army.cancel_dialog.msg", "هل أنت متأكد من إلغاء أمر تعبئة القوات؟ ستتم استعادة الموارد." }
+            { "army.cancel_dialog.msg", "هل أنت متأكد من إلغاء أمر تعبئة القوات؟ ستتم استعادة الموارد." },
+
+            // Economy & Resources
+            { "res.gold", "الذهب" },
+            { "res.oil", "النفط" },
+            { "res.iron", "الحديد" },
+            { "res.rate_per_hour", "+{0}/ساعة" },
+            { "res.capacity", "السعة: {0} / {1}" },
+            { "res.time_to_full", "الامتلاء خلال: {0}" },
+            { "res.projection_estimate", "* حساب تقديري مستمر" },
+            { "res.shortfall", "نقص: {0}" },
+            { "res.status.normal", "طبيعي" },
+            { "res.status.near_cap", "قارب الامتلاء (90%+)" },
+            { "res.status.capped", "المستودع ممتلئ" },
+            { "res.status.stale", "جارٍ المزامنة مع الخادم..." },
+            { "res.drawer.title", "الاقتصاد وإنتاج الموارد" },
+            { "res.drawer.rates_header", "معدلات الإنتاج بالساعة" },
+            { "res.drawer.caps_header", "سعات التخزين والمخازن المحمية" },
+            { "res.drawer.btn_refresh", "مزامنة البيانات" },
+            { "res.insufficient.gold", "رصيد الذهب غير كافٍ (نقص: {0})" },
+            { "res.insufficient.oil", "رصيد النفط غير كافٍ (نقص: {0})" },
+            { "res.insufficient.iron", "رصيد الحديد غير كافٍ (نقص: {0})" }
         };
     }
 }

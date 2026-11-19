@@ -72,6 +72,18 @@ namespace KingWorldWar.Core.Common
         public static GameError InvalidRecruitCount(int count) =>
             new GameError("INVALID_RECRUIT_COUNT", $"Recruitment quantity must be greater than zero (received {count}).", count.ToString());
 
+        public static GameError InvalidPayload(string details) =>
+            new GameError("INVALID_PAYLOAD", "Payload is malformed, missing fields, or contains invalid values.", details);
+
+        public static GameError DuplicateRequest(string requestId) =>
+            new GameError("DUPLICATE_REQUEST", "Request has already been processed (idempotency key matched).", requestId);
+
+        public static GameError StaleVersion(long expected, long actual) =>
+            new GameError("STALE_VERSION", $"Optimistic concurrency check failed (expected revision {expected}, current is {actual}).", $"{expected}:{actual}");
+
+        public static GameError RateLimited(string details) =>
+            new GameError("RATE_LIMITED", "Operation rate limit exceeded. Please wait before retrying.", details);
+
         public bool Equals(GameError other) =>
             string.Equals(Code, other.Code, StringComparison.Ordinal) &&
             string.Equals(Message, other.Message, StringComparison.Ordinal);

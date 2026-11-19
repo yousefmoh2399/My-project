@@ -1,7 +1,7 @@
 # PROJECT STATE — KING WORLD WAR
 
-**Last Updated:** Phase 06 (Army & Military Units: Recruitment, Formations, Combat Stats)  
-**Active Branch:** `phase-06/army-units`  
+**Last Updated:** Phase 06 (Resources & Economy: Server-Authoritative Design)  
+**Active Branch:** `phase-06/economy`  
 **Engine:** Unity 6 (`6000.6.9f1`)  
 **Active Render Pipeline:** Universal Render Pipeline (URP 17.6.0)
 
@@ -122,7 +122,36 @@
   - **50 PlayMode tests** (including `PlayerBaseInteractionTests` verifying all 7 MVP buildings + radar, mock badge, real-time Arabic update, and `ArmyInteractionTests`).
   - **163 total automated tests across all suites (100% pass rate, 0 failed, 0 errors).**
 
-### Phase 06 — Army & Military Units (Recruitment, Formations, Combat Stats)
+### Phase 06 — Resources & Economy (Server-Authoritative Design)
+- **Culture-Aware Military Resource Formatter (`ResourceFormatter`):**
+  - Standard abbreviation rules: `< 1,000` integer, `1.25K`, `3.4M`, `2.5B`.
+  - Floor rounding ensures client displays strictly no more than authoritative server balances.
+  - Signed 64-bit (`long`) large-number safety and overflow protection against `long.MaxValue`.
+  - Visual alert state thresholds: `Zero` (muted), `Normal` (gold/white), `NearCap` ($\ge 90\%$ amber), `Capped` ($100\%$ red), `Stale` (amber).
+  - Time-to-full duration calculations towards storage cap.
+- **Immutable Domain & Continuous Accrual Model (`KingWorldWar.Core.Economy`):**
+  - Pure C# domain abstractions: `ResourceType` (Gold, Oil, Iron), `ResourceAmount`, `StorageCapacity`, `ResourceYieldRate`.
+  - Server-authoritative `EconomySnapshot` with continuous passive accrual projection:
+    $$\text{Accrued} = \min\left(\text{StorageCap} - \text{Balance}, \left\lfloor \frac{\Delta t \times \text{RatePerHour}}{3600} \right\rfloor\right)$$
+  - Eliminates manual claim button friction and database claim-spamming exploits.
+  - Zero client write path: verified via reflection unit tests asserting absence of public setters or mutating methods.
+  - Development mock repository `LocalMockEconomyRepository` simulating latency, optimistic concurrency checks (`STALE_VERSION`), idempotency key caching, and insufficient balance rejection.
+- **Server Contract Specification (`docs/api/economy-contract.md`):**
+  - Nakama RPC specifications for `kww.economy.get_snapshot` and `kww.base.upgrade.request`.
+  - Idempotency via client-generated UUIDv4 `request_id` and PostgreSQL append-only ledger `resource_ledger`.
+  - Data-driven configuration proposed via `EconomyConfigSO` (10 levels of storage caps and production rates).
+- **UI Presentation & Integration:**
+  - `ResourceHeaderView` displays live abbreviated balances with threshold coloring and opens economy details on click.
+  - `EconomyDetailDrawer` displays hourly production yields, storage limits, and time-to-full estimates.
+  - `BuildingDetailDrawer` checks affordability via `_economyService.CanAfford()` and disables Upgrade button with red shortfall text when balance is insufficient.
+- **Bilingual Military Localization:**
+  - 100% string key parity in Arabic RTL and English for all 18 economy keys.
+- **Automated Test Coverage:**
+  - **141 EditMode tests** (including 13 `ResourceFormatterTests`, 7 `EconomySnapshotTests`, 6 `EconomyRepositoryTests`, and 1 `EconomyLocalizationTests`).
+  - **54 PlayMode tests** (including 4 new `EconomyUITests`).
+  - **195 total automated tests across all suites (100% pass rate, 0 failed, 0 errors).**
+
+### Feature Module — Army & Military Units (Recruitment, Formations, Combat Stats)
 - **Unit Archetypes & Combat Domain:**
   - 4 foundational military unit archetypes in `KingWorldWar.Core.Army`: Tactical Infantry (`UnitType.Infantry`), Armored Recon (`UnitType.ReconVehicle`), Main Battle Tank (`UnitType.Tank`), and Heavy Artillery (`UnitType.Artillery`).
   - Robust immutable `UnitId` struct and comprehensive `UnitStats` model (Health, Attack, Defense, Speed, Range, Combat Power auto-calculation).

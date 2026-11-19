@@ -1,4 +1,4 @@
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEBUG || UNITY_INCLUDE_TESTS
 using KingWorldWar.Core.Base;
 
 namespace KingWorldWar.Infrastructure.Base

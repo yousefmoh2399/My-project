@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using KingWorldWar.Core.Army;
 using KingWorldWar.Core.Base;
 using KingWorldWar.Core.Common;
+using KingWorldWar.Core.Economy;
 using KingWorldWar.Core.Localization;
 using KingWorldWar.Core.Logging;
 using KingWorldWar.Core.Networking;
@@ -13,6 +14,7 @@ using KingWorldWar.Core.WorldMap;
 using KingWorldWar.Infrastructure.Army;
 using KingWorldWar.Infrastructure.Base;
 using KingWorldWar.Infrastructure.Config;
+using KingWorldWar.Infrastructure.Economy;
 using KingWorldWar.Infrastructure.Localization;
 using KingWorldWar.Infrastructure.Quality;
 using KingWorldWar.Infrastructure.Scenes;
@@ -158,6 +160,25 @@ namespace KingWorldWar.App
             container.Register<IArmyDataSource>(armyConfig);
             container.Register<IArmyStateRepository>(armyRepo);
             container.Register<IArmyService>(armyService);
+
+            var economyConfig = ScriptableObject.CreateInstance<EconomyConfigSO>();
+            economyConfig.InitializeFromDefaults();
+#if UNITY_EDITOR || DEBUG || UNITY_INCLUDE_TESTS
+            var economyRepo = new LocalMockEconomyRepository(
+                economyConfig.StartingGold,
+                economyConfig.StartingOil,
+                economyConfig.StartingIron,
+                economyConfig.GetStorageCapForLevel(1),
+                economyConfig.GetProductionRateForLevel(1));
+#else
+            var economyRepo = new LocalMockEconomyRepository();
+#endif
+            var economyService = new EconomyService(economyRepo, log);
+
+            container.Register<EconomyConfigSO>(economyConfig);
+            container.Register<IEconomyRepository>(economyRepo);
+            container.Register<IEconomyService>(economyService);
+            container.Register<IResourceState>(economyService);
 
             container.Register<IAuthService>(new NullAuthService());
             container.Register<IPlayerRepository>(new NullPlayerRepository());
