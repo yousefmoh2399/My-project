@@ -9,24 +9,25 @@ namespace KingWorldWar.Core.WorldMap
     {
         public static readonly RegionId Empty = new RegionId(string.Empty);
 
-        public string Value { get; }
+        private readonly string _value;
+        public string Value => _value ?? string.Empty;
 
         public bool IsValid => !string.IsNullOrWhiteSpace(Value) && Value.StartsWith("reg_");
 
         public RegionId(string value)
         {
-            Value = value?.Trim() ?? string.Empty;
+            _value = value?.Trim() ?? string.Empty;
         }
 
         public bool Equals(RegionId other) => string.Equals(Value, other.Value, StringComparison.OrdinalIgnoreCase);
 
         public override bool Equals(object obj) => obj is RegionId other && Equals(other);
 
-        public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value ?? string.Empty);
+        public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
 
         public int CompareTo(RegionId other) => string.Compare(Value, other.Value, StringComparison.OrdinalIgnoreCase);
 
-        public override string ToString() => Value ?? string.Empty;
+        public override string ToString() => Value;
 
         public static bool operator ==(RegionId left, RegionId right) => left.Equals(right);
 

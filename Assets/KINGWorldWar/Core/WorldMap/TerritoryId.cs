@@ -10,24 +10,25 @@ namespace KingWorldWar.Core.WorldMap
     {
         public static readonly TerritoryId Empty = new TerritoryId(string.Empty);
 
-        public string Value { get; }
+        private readonly string _value;
+        public string Value => _value ?? string.Empty;
 
         public bool IsValid => !string.IsNullOrWhiteSpace(Value) && Value.StartsWith("ter_");
 
         public TerritoryId(string value)
         {
-            Value = value?.Trim() ?? string.Empty;
+            _value = value?.Trim() ?? string.Empty;
         }
 
         public bool Equals(TerritoryId other) => string.Equals(Value, other.Value, StringComparison.OrdinalIgnoreCase);
 
         public override bool Equals(object obj) => obj is TerritoryId other && Equals(other);
 
-        public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value ?? string.Empty);
+        public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
 
         public int CompareTo(TerritoryId other) => string.Compare(Value, other.Value, StringComparison.OrdinalIgnoreCase);
 
-        public override string ToString() => Value ?? string.Empty;
+        public override string ToString() => Value;
 
         public static bool operator ==(TerritoryId left, TerritoryId right) => left.Equals(right);
 

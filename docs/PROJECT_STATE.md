@@ -1,7 +1,7 @@
 # PROJECT STATE — KING WORLD WAR
 
-**Last Updated:** Phase 04 (World Map & Strategic Territories — 5 Regions, 25 Territories)  
-**Active Branch:** `phase-04/world-map`  
+**Last Updated:** Phase 05 (Player Base & Building Systems)  
+**Active Branch:** `phase-05/player-base`  
 **Engine:** Unity 6 (`6000.6.9f1`)  
 **Active Render Pipeline:** Universal Render Pipeline (URP 17.6.0)
 
@@ -88,6 +88,32 @@
   - **31 PlayMode tests** (including 10 new `WorldMapInteractionTests` verifying raycast selection, camera focus, UI click isolation, and drawer data binding).
   - **99 total automated tests across all suites (100% pass rate, 0 failed, 0 errors).**
 
+### Phase 05 — Player Base & Building Systems
+- **Tactical 2D Base Grid (`BaseGrid`):**
+  - $20 \times 20$ cell grid with $4.0\text{m} \times 4.0\text{m}$ cell world dimensions.
+  - Cell occupancy tracking with rectangular footprint collision validation.
+  - Relocation / Move validation ensuring target cells are vacant (ignoring building's own current cells).
+- **Core Domain & Building Archetypes:**
+  - 5 core military structures: Command Center (`CommandCenter`), Barracks (`Barracks`), Supply Depot (`SupplyDepot`), Radar Station (`RadarStation`), Vehicle Factory (`VehicleFactory`).
+  - Progression balance curves for Levels 1–10 with Gold, Oil, Iron costs, construction durations in seconds, and HQ prerequisite gates.
+  - Pure C# abstractions `IBuildingDataSource`, `IBaseStateRepository`, `IPlayerBaseService`.
+- **Untrusted Client Security:**
+  - Client state is explicitly non-authoritative simulation (`[NonAuthoritative]`).
+  - Timers calculate progression using UTC timestamps (`DateTime.UtcNow` vs `UpgradeEndTimeUtc`), not malleable per-frame delta time.
+  - Async service interface (`RequestUpgradeAsync`, `CancelUpgradeAsync`) ready for drop-in server RPC replacement in Phase 8.
+- **3D Base Presentation & UI:**
+  - `PlayerBaseView`: Spawns building 3D prefabs, handles pointer raycast selection with mouse and touch (`EnhancedTouchSupport` safety), UI click rejection, and camera focus synchronization.
+  - `BuildingView`: Selection ring, world-space level banner, and real-time upgrade countdown timer.
+  - `BuildingDetailDrawer`: Slide-in drawer showing structure intelligence, level, performance perks, upgrade costs vs current resources, HQ prerequisites, real-time timer countdown, Upgrade button, and Cancel button.
+- **Bilingual Localization:**
+  - 100% string key parity in Arabic RTL and English for all building names, descriptions, and drawer UI controls.
+- **Documentation:**
+  - Created `docs/base/BASE_BUILDING_SPEC.md` and `docs/base/ADDING_BUILDINGS.md`.
+- **Automated Test Coverage:**
+  - **91 EditMode tests** (including 11 `BaseGridTests`, 9 `BuildingUpgradeTests`, and 3 `BuildingLocalizationTests`).
+  - **40 PlayMode tests** (including 9 `PlayerBaseInteractionTests` and updated `BootstrapFlowTests`).
+  - **131 total automated tests across all suites (100% pass rate, 0 failed, 0 errors).**
+
 ---
 
 ## 2. DECISIONS REGISTER
@@ -100,6 +126,7 @@
 - **Accessibility & Touch Targets:** All interactive buttons enforce minimum dimensions of 48x48dp per mobile accessibility standards (Apple HIG and Google Material).
 - **Client Trust:** Zero authoritative logic on the client; currency and battle resolution reserved for Nakama server.
 - **ADR-0004 (World Map Topology & Untrusted Client):** All 25 territories and 5 regions are declared via pure C# domain contracts and immutable ScriptableObject configs. The graph topology enforces 100% bidirectional symmetry and single-component connectivity. All territory runtime values (yields, defense, ownership) are strictly non-authoritative client displays with explicit warnings until server-synchronized in Phase 8/9. Colorblind accessibility symbols (`★`, `◆`, `✖`, `▲`) accompany faction colors.
+- **ADR-0005 (Player Base Grid & Upgrade Architecture):** Tactical base operations use a $20 \times 20$ discrete grid with rectangular footprint occupancy. Upgrades enforce Command Center prerequisite tier gating. Client upgrade countdowns rely on UTC timestamps and asynchronous contracts (`Task<Result<...>>`) to cleanly bridge from local in-memory simulation to authoritative Nakama RPCs in Phase 8.
 
 ---
 
@@ -115,6 +142,16 @@
 ---
 
 ## 4. HOW TO RUN
+
+### Running the Player Base in Main Menu
+1. Open `Assets/KINGWorldWar/Scenes/MainMenu.unity`.
+2. Enter Play Mode.
+3. In the bottom navigation bar, tap the **Base** tab. The view smoothly transitions to the 3D player base at offset $(200, 0, 0)$.
+4. Click or tap any building (Command Center, Barracks, Supply Depot, Radar Station, Vehicle Factory) to select it; the camera centers on the structure.
+5. In the slide-in `BuildingDetailDrawer`, view current level, costs, and perks.
+6. Click **Upgrade** to start construction: observe the real-time countdown timer in the drawer and the 3D world-space billboard above the building.
+7. Click **Cancel** to abort construction with a confirmation dialog.
+8. Tap the **World** tab in the bottom bar to smoothly return to the 3D strategic World Map.
 
 ### Running the World Map in Main Menu
 1. Open `Assets/KINGWorldWar/Scenes/MainMenu.unity`.

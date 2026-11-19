@@ -6,7 +6,8 @@
     "KingWorldWar.Infrastructure",
     "KingWorldWar.UI",
     "KingWorldWar.Features.Camera",
-    "KingWorldWar.Features.WorldMap"
+    "KingWorldWar.Features.WorldMap",
+    "KingWorldWar.Features.Base"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

@@ -146,7 +146,41 @@ namespace KingWorldWar.Infrastructure.Localization
             { "world.drawer.action_attack", "Attack" },
             { "world.drawer.action_scout", "Scout" },
             { "world.drawer.phase9_note", "Combat operations unlock in Phase 9" },
-            { "world.legend.title", "Theater Factions" }
+            { "world.legend.title", "Theater Factions" },
+
+            // Base & Building Names & Descriptions
+            { "building.hq.name", "Command Center" },
+            { "building.hq.desc", "Headquarters of base operations and strategic command." },
+            { "building.hq.desc_perk", "Max Building Level: {0}" },
+            { "building.barracks.name", "Barracks" },
+            { "building.barracks.desc", "Infantry quarters, tactical squad training, and base garrison." },
+            { "building.barracks.desc_perk", "Troop Capacity: {0}" },
+            { "building.depot.name", "Supply Depot" },
+            { "building.depot.desc", "Reinforced logistics warehouses securing base resource stockpiles." },
+            { "building.depot.desc_perk", "Storage Capacity: {0}" },
+            { "building.radar.name", "Radar Station" },
+            { "building.radar.desc", "Early warning scanning array and battlefield intelligence center." },
+            { "building.radar.desc_perk", "Recon Range: {0} Regions" },
+            { "building.factory.name", "Vehicle Factory" },
+            { "building.factory.desc", "Heavy industrial plant assembling tanks and mechanized combat armor." },
+            { "building.factory.desc_perk", "Armor Staging: {0}" },
+
+            // Base Building Detail Drawer UI
+            { "base.drawer.title", "Structure Dossier" },
+            { "base.drawer.level", "Level {0}" },
+            { "base.drawer.max_level", "MAX LEVEL" },
+            { "base.drawer.upgrade_cost", "Upgrade Cost" },
+            { "base.drawer.upgrade_time", "Construction Time" },
+            { "base.drawer.req_hq", "Requires HQ Level {0}" },
+            { "base.drawer.req_hq_met", "HQ Requirement Satisfied" },
+            { "base.drawer.action_upgrade", "Upgrade" },
+            { "base.drawer.action_cancel", "Cancel" },
+            { "base.drawer.upgrading", "Upgrading..." },
+            { "base.drawer.time_remaining", "Time Remaining: {0}" },
+            { "base.drawer.current_perk", "Current Performance" },
+            { "base.drawer.next_perk", "Next Level Upgrade" },
+            { "base.cancel_dialog.title", "Cancel Construction" },
+            { "base.cancel_dialog.msg", "Are you sure you want to abort the upgrade in progress?" }
         };
 
         public static readonly Dictionary<string, string> ArabicTable = new Dictionary<string, string>
@@ -281,7 +315,41 @@ namespace KingWorldWar.Infrastructure.Localization
             { "world.drawer.action_attack", "هجوم" },
             { "world.drawer.action_scout", "استطلاع" },
             { "world.drawer.phase9_note", "ستتاح العمليات القتالية في المرحلة 9" },
-            { "world.legend.title", "دليل القوى في مسرح العمليات" }
+            { "world.legend.title", "دليل القوى في مسرح العمليات" },
+
+            // Base & Building Names & Descriptions
+            { "building.hq.name", "مقر القيادة" },
+            { "building.hq.desc", "مقر العمليات والقيادة الاستراتيجية للقاعدة." },
+            { "building.hq.desc_perk", "الحد الأقصى لمستوى المباني: {0}" },
+            { "building.barracks.name", "الثكنات العسكرية" },
+            { "building.barracks.desc", "تمركز وتدريب فرق المشاة التكتيكية وحراسة القاعدة." },
+            { "building.barracks.desc_perk", "سعة القوات: {0}" },
+            { "building.depot.name", "مستودع الإمداد" },
+            { "building.depot.desc", "مستودعات لوجستية محصنة لتخزين وتأمين مخزون الموارد." },
+            { "building.depot.desc_perk", "سعة التخزين: {0}" },
+            { "building.radar.name", "محطة الرادار" },
+            { "building.radar.desc", "منظومة مسح وإنذار مبكر ومركز استخبارات مسرح العمليات." },
+            { "building.radar.desc_perk", "مدى الاستطلاع: {0} أقاليم" },
+            { "building.factory.name", "مصنع الآليات" },
+            { "building.factory.desc", "مجمع صناعي ثقيل لتجميع وصيانة الدبابات والمدرعات القتالية." },
+            { "building.factory.desc_perk", "سعة الدروع: {0}" },
+
+            // Base Building Detail Drawer UI
+            { "base.drawer.title", "بيانات المنشأة" },
+            { "base.drawer.level", "المستوى {0}" },
+            { "base.drawer.max_level", "المستوى الأقصى" },
+            { "base.drawer.upgrade_cost", "تكلفة الترقية" },
+            { "base.drawer.upgrade_time", "وقت البناء" },
+            { "base.drawer.req_hq", "يتطلب مقر القيادة مستوى {0}" },
+            { "base.drawer.req_hq_met", "تم استيفاء شرط مقر القيادة" },
+            { "base.drawer.action_upgrade", "ترقية" },
+            { "base.drawer.action_cancel", "إلغاء" },
+            { "base.drawer.upgrading", "جاري الترقية..." },
+            { "base.drawer.time_remaining", "الوقت المتبقي: {0}" },
+            { "base.drawer.current_perk", "القدرات الحالية" },
+            { "base.drawer.next_perk", "مزايا المستوى التالي" },
+            { "base.cancel_dialog.title", "إلغاء أعمال الترقية" },
+            { "base.cancel_dialog.msg", "هل أنت متأكد من إلغاء عملية الترقية الجارية؟" }
         };
     }
 }

@@ -46,6 +46,13 @@
 | `territory.ter_oas_001.name` | Palm Oasis | واحة النخيل | Territory / Oasis | `Needs Human Review` | Oasis capital oasis hub. |
 | `territory.ter_val_001.name` | Iron Bastion | حصن الحديد | Territory / Valley | `Needs Human Review` | Valley capital fortress. |
 | `territory.ter_rdg_001.name` | Ridge Spire | برج الهضبة | Territory / Ridge | `Needs Human Review` | Ridge capital mountain spire. |
+| `building.hq.name` | Command Center | مقر القيادة | Base / Building | `Needs Human Review` | Central command structure. |
+| `building.barracks.name` | Barracks | الثكنات العسكرية | Base / Building | `Needs Human Review` | Infantry quarters and training. |
+| `building.depot.name` | Supply Depot | مستودع الإمداد | Base / Building | `Needs Human Review` | Resource storage and logistics. |
+| `building.radar.name` | Radar Station | محطة الرادار | Base / Building | `Needs Human Review` | Early warning and recon. |
+| `building.factory.name` | Vehicle Factory | مصنع الآليات | Base / Building | `Needs Human Review` | Armored vehicle production. |
+| `base.drawer.action_upgrade` | Upgrade | ترقية | Base / UI | `Needs Human Review` | Structure upgrade button. |
+| `base.cancel_dialog.title` | Cancel Construction | إلغاء أعمال الترقية | Base / UI | `Needs Human Review` | Upgrade cancellation prompt. |
 
 ---
 

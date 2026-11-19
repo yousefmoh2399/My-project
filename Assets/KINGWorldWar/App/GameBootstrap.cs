@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using KingWorldWar.Core.Base;
 using KingWorldWar.Core.Common;
 using KingWorldWar.Core.Localization;
 using KingWorldWar.Core.Logging;
@@ -8,6 +9,7 @@ using KingWorldWar.Core.Quality;
 using KingWorldWar.Core.Scenes;
 using KingWorldWar.Core.UI;
 using KingWorldWar.Core.WorldMap;
+using KingWorldWar.Infrastructure.Base;
 using KingWorldWar.Infrastructure.Config;
 using KingWorldWar.Infrastructure.Localization;
 using KingWorldWar.Infrastructure.Quality;
@@ -136,6 +138,15 @@ namespace KingWorldWar.App
             container.Register<ITerritoryDataSource>(worldMapConfig);
             container.Register<ITerritoryStateRepository>(territoryRepo);
             container.Register<IWorldMapService>(worldMapService);
+
+            var baseConfig = ScriptableObject.CreateInstance<BaseConfigSO>();
+            baseConfig.InitializeFromDefaults();
+            var baseRepo = new InMemoryBaseStateRepository(baseConfig);
+            var playerBaseService = new PlayerBaseService(baseConfig, baseRepo, log);
+
+            container.Register<IBuildingDataSource>(baseConfig);
+            container.Register<IBaseStateRepository>(baseRepo);
+            container.Register<IPlayerBaseService>(playerBaseService);
 
             container.Register<IAuthService>(new NullAuthService());
             container.Register<IPlayerRepository>(new NullPlayerRepository());

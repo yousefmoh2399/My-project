@@ -1,12 +1,16 @@
+using KingWorldWar.Core.Base;
 using KingWorldWar.Core.Localization;
 using KingWorldWar.Core.Logging;
 using KingWorldWar.Core.UI;
 using KingWorldWar.Core.WorldMap;
+using KingWorldWar.Features.Base;
 using KingWorldWar.Features.Camera;
 using KingWorldWar.Features.WorldMap;
+using KingWorldWar.Infrastructure.Base;
 using KingWorldWar.Infrastructure.Localization;
 using KingWorldWar.Infrastructure.UI;
 using KingWorldWar.Infrastructure.WorldMap;
+using KingWorldWar.UI.Base;
 using KingWorldWar.UI.Common;
 using KingWorldWar.UI.Modals;
 using KingWorldWar.UI.Shell;
@@ -30,6 +34,10 @@ namespace KingWorldWar.App
         [SerializeField] private WorldMapView _worldMapView;
         [SerializeField] private TerritoryDetailDrawer _territoryDetailDrawer;
         [SerializeField] private StrategyCameraRig _cameraRig;
+
+        [Header("Player Base")]
+        [SerializeField] private PlayerBaseView _playerBaseView;
+        [SerializeField] private BuildingDetailDrawer _buildingDetailDrawer;
 
         public MainMenuShellView ShellView
         {
@@ -61,6 +69,18 @@ namespace KingWorldWar.App
             set => _territoryDetailDrawer = value;
         }
 
+        public PlayerBaseView PlayerBaseView
+        {
+            get => _playerBaseView;
+            set => _playerBaseView = value;
+        }
+
+        public BuildingDetailDrawer BuildingDetailDrawer
+        {
+            get => _buildingDetailDrawer;
+            set => _buildingDetailDrawer = value;
+        }
+
         public StrategyCameraRig CameraRig
         {
             get => _cameraRig;
@@ -71,6 +91,7 @@ namespace KingWorldWar.App
         public ILocalizationService LocalizationService { get; private set; }
         public IModalService ModalService { get; private set; }
         public IWorldMapService WorldMapService { get; private set; }
+        public IPlayerBaseService PlayerBaseService { get; private set; }
 
         private void Start()
         {
@@ -98,10 +119,23 @@ namespace KingWorldWar.App
                 container.Register<IWorldMapService>(mapService);
             }
 
+            // Player Base fallback if scene launched directly
+            if (!container.TryResolve<IPlayerBaseService>(out var baseService))
+            {
+                var baseConfig = ScriptableObject.CreateInstance<BaseConfigSO>();
+                baseConfig.InitializeFromDefaults();
+                var baseRepo = new InMemoryBaseStateRepository(baseConfig);
+                baseService = new PlayerBaseService(baseConfig, baseRepo, log);
+                container.Register<IBuildingDataSource>(baseConfig);
+                container.Register<IBaseStateRepository>(baseRepo);
+                container.Register<IPlayerBaseService>(baseService);
+            }
+
             NavigationService = nav;
             LocalizationService = loc;
             ModalService = modal;
             WorldMapService = mapService;
+            PlayerBaseService = baseService;
 
             if (!container.TryResolve<ILocalizationService>(out _))
                 container.Register<ILocalizationService>(loc);
@@ -136,11 +170,57 @@ namespace KingWorldWar.App
                 _territoryDetailDrawer.Bind(mapService, loc);
             }
 
+            if (_playerBaseView != null)
+            {
+                _playerBaseView.Bind(baseService, loc, _cameraRig);
+            }
+
+            if (_buildingDetailDrawer != null)
+            {
+                _buildingDetailDrawer.Bind(baseService, loc, modal);
+            }
+
+            // Setup Screen switching
+            nav.OnScreenChanged += HandleScreenChanged;
+            HandleScreenChanged(nav.CurrentScreen);
+
             // Bind any LocalizedText components in scene
             var localizedTexts = Object.FindObjectsByType<LocalizedText>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             foreach (var lt in localizedTexts)
             {
                 lt.Bind(loc);
+            }
+        }
+
+        private void HandleScreenChanged(ScreenId screenId)
+        {
+            if (screenId == ScreenId.World)
+            {
+                if (_worldMapView != null) _worldMapView.gameObject.SetActive(true);
+                if (_playerBaseView != null) _playerBaseView.gameObject.SetActive(false);
+                if (_buildingDetailDrawer != null) _buildingDetailDrawer.Hide();
+                if (_cameraRig != null)
+                {
+                    _cameraRig.SetFocusPosition(new Vector3(50f, 0f, 40f));
+                }
+            }
+            else if (screenId == ScreenId.Base)
+            {
+                if (_worldMapView != null) _worldMapView.gameObject.SetActive(false);
+                if (_playerBaseView != null) _playerBaseView.gameObject.SetActive(true);
+                if (_territoryDetailDrawer != null) _territoryDetailDrawer.Hide();
+                if (_playerBaseView != null && _cameraRig != null)
+                {
+                    _cameraRig.SetFocusPosition(_playerBaseView.GridView.BaseCenterWorldPosition);
+                }
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (NavigationService != null)
+            {
+                NavigationService.OnScreenChanged -= HandleScreenChanged;
             }
         }
     }

@@ -36,6 +36,27 @@ namespace KingWorldWar.Core.Common
         public static GameError NetworkUnavailable(string reason) =>
             new GameError("NETWORK_UNAVAILABLE", "Network is unreachable or offline.", reason);
 
+        public static GameError BuildingNotFound(string id) =>
+            new GameError("BUILDING_NOT_FOUND", $"Building with ID '{id}' was not found.", id);
+
+        public static GameError BuildingMaxLevel(string id, int level) =>
+            new GameError("BUILDING_MAX_LEVEL", $"Building '{id}' is already at maximum level {level}.", id);
+
+        public static GameError BuildingAlreadyUpgrading(string id) =>
+            new GameError("BUILDING_ALREADY_UPGRADING", $"Building '{id}' is already currently upgrading.", id);
+
+        public static GameError BuildingNotUpgrading(string id) =>
+            new GameError("BUILDING_NOT_UPGRADING", $"Building '{id}' is not currently undergoing an upgrade.", id);
+
+        public static GameError InsufficientResources(string details) =>
+            new GameError("INSUFFICIENT_RESOURCES", "Player does not possess sufficient resources for this operation.", details);
+
+        public static GameError PrerequisiteNotMet(string details) =>
+            new GameError("PREREQUISITE_NOT_MET", "Building upgrade prerequisite has not been satisfied.", details);
+
+        public static GameError GridPlacementFailed(string details) =>
+            new GameError("GRID_PLACEMENT_FAILED", "Building cannot be placed at the specified grid coordinates.", details);
+
         public bool Equals(GameError other) =>
             string.Equals(Code, other.Code, StringComparison.Ordinal) &&
             string.Equals(Message, other.Message, StringComparison.Ordinal);

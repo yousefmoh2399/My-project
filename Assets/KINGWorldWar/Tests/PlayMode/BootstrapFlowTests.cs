@@ -1,10 +1,12 @@
 using System.Collections;
 using KingWorldWar.App;
+using KingWorldWar.Core.Base;
 using KingWorldWar.Core.Localization;
 using KingWorldWar.Core.Logging;
 using KingWorldWar.Core.Networking;
 using KingWorldWar.Core.Quality;
 using KingWorldWar.Core.UI;
+using KingWorldWar.Core.WorldMap;
 using KingWorldWar.Infrastructure.Config;
 using KingWorldWar.Infrastructure.Scenes;
 using NUnit.Framework;
@@ -84,6 +86,12 @@ namespace KingWorldWar.Tests.PlayMode
 
             Assert.IsTrue(container.TryResolve<IModalService>(out var resolvedModal));
             Assert.IsNotNull(resolvedModal);
+
+            Assert.IsTrue(container.TryResolve<IWorldMapService>(out var resolvedWorldMap));
+            Assert.IsNotNull(resolvedWorldMap);
+
+            Assert.IsTrue(container.TryResolve<IPlayerBaseService>(out var resolvedBaseService));
+            Assert.IsNotNull(resolvedBaseService);
         }
     }
 }
