@@ -4,6 +4,7 @@
 **Date:** 2026-11-19T12:50:00+02:00  
 **Agent:** Antigravity (Senior Unity / Backend Engineer)  
 **Branch:** `phase-06/army-units`  
+**Commit Hash:** `9413c4d44bcb9d3c0acfebfe45d7f25a9913cf05`  
 **Status:** COMPLETE / READY FOR OWNER REVIEW  
 
 ---
