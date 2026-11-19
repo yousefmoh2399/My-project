@@ -57,7 +57,96 @@ namespace KingWorldWar.Infrastructure.Localization
             { "dialog.switch_lang_title", "Language Changed" },
             { "dialog.switch_lang_msg", "Language has been updated successfully." },
             { "dialog.error_title", "Command Error" },
-            { "dialog.error_generic", "An unexpected tactical error occurred. Please retry." }
+            { "dialog.error_generic", "An unexpected tactical error occurred. Please retry." },
+
+            // Regions (5)
+            { "region.north.name", "Al-Shamal Reach" },
+            { "region.north.desc", "Glacial highlands, strategic chokepoints, and rich iron deposits." },
+            { "region.coast.name", "Iron Coast Basin" },
+            { "region.coast.desc", "Industrial maritime delta, shipyards, and major petroleum depots." },
+            { "region.oasis.name", "Al-Waha Front" },
+            { "region.oasis.desc", "Arid desert plateau with vital petroleum fields and canyon passes." },
+            { "region.valley.name", "Verdant Valley" },
+            { "region.valley.desc", "Fertile central riverlands, agricultural granaries, and command nexus." },
+            { "region.ridge.name", "Obsidian Ridge" },
+            { "region.ridge.desc", "Volcanic mountain redoubts, basalt canyons, and heavy ordnance foundries." },
+
+            // North Territories (5)
+            { "territory.nrd_001.name", "Frostpeak Redoubt" },
+            { "territory.nrd_001.desc", "Ancient mountaintop fortress serving as the northern command citadel." },
+            { "territory.nrd_002.name", "Borealis Pass" },
+            { "territory.nrd_002.desc", "Narrow glacial passage through the northern mountain range." },
+            { "territory.nrd_003.name", "Ironcrag Valley" },
+            { "territory.nrd_003.desc", "Heavy mining gorge producing high-grade iron ore for weapons manufacturing." },
+            { "territory.nrd_004.name", "Glacial Rim Outpost" },
+            { "territory.nrd_004.desc", "Radar surveillance station monitoring the northern sea approaches." },
+            { "territory.nrd_005.name", "Valken Tundra" },
+            { "territory.nrd_005.desc", "Frozen wind-swept plains ideal for rapid mechanized armored maneuvers." },
+
+            // Coast Territories (5)
+            { "territory.cst_001.name", "Steel Bay Anchorage" },
+            { "territory.cst_001.desc", "Deepwater harbor and regional naval fortress commanding the western seas." },
+            { "territory.cst_002.name", "Crimson Docks" },
+            { "territory.cst_002.desc", "Vast drydocks, cargo cranes, and automated assembly yards." },
+            { "territory.cst_003.name", "Trident Delta" },
+            { "territory.cst_003.desc", "Triple-river mouth marshlands bridging the coast with the central valley." },
+            { "territory.cst_004.name", "Saltmarsh Depot" },
+            { "territory.cst_004.desc", "Concealed petroleum storage bunkers built among the coastal salt flats." },
+            { "territory.cst_005.name", "Beacon Headland" },
+            { "territory.cst_005.desc", "Fortified promontory with coastal artillery batteries overlooking maritime routes." },
+
+            // Oasis Territories (5)
+            { "territory.oas_001.name", "Sunfire Citadel" },
+            { "territory.oas_001.desc", "Massive sandstone fortress standing defiant against desert storms." },
+            { "territory.oas_002.name", "Mirage Dune Fields" },
+            { "territory.oas_002.desc", "Shifting sand ocean concealing valuable subsurface petroleum deposits." },
+            { "territory.oas_003.name", "Black Gold Wells" },
+            { "territory.oas_003.desc", "Industrial oil refinery complex pumping fuel to frontier war machines." },
+            { "territory.oas_004.name", "Qalat Al-Rih Pass" },
+            { "territory.oas_004.desc", "Windy canyon gorge guarding the entrance to the desert heartland." },
+            { "territory.oas_005.name", "Nomad Crossing" },
+            { "territory.oas_005.desc", "Historic desert caravan intersection transformed into an armed logistical hub." },
+
+            // Valley Territories (5)
+            { "territory.val_001.name", "Emerald Nexus" },
+            { "territory.val_001.desc", "Central command capital and strategic junction connecting all five regions." },
+            { "territory.val_002.name", "Silver River Bridge" },
+            { "territory.val_002.desc", "Reinforced strategic bridge spanning the mighty Silver River." },
+            { "territory.val_003.name", "Golden Plains Granary" },
+            { "territory.val_003.desc", "Endless wheat plateaus generating crucial gold trade and troop sustenance." },
+            { "territory.val_004.name", "Whispering Woods" },
+            { "territory.val_004.desc", "Dense ancient forest providing natural ambush cover and defense." },
+            { "territory.val_005.name", "Amber Ridge" },
+            { "territory.val_005.desc", "Gentle hillside heights offering wide panoramic view over central crossroads." },
+
+            // Ridge Territories (5)
+            { "territory.rdg_001.name", "Ashforge Bastion" },
+            { "territory.rdg_001.desc", "Subterranean military stronghold fueled by geothermal volcanic energy." },
+            { "territory.rdg_002.name", "Basalt Canyon" },
+            { "territory.rdg_002.desc", "Towering dark stone gorge forming an impenetrable defensive barrier." },
+            { "territory.rdg_003.name", "Brimstone Mines" },
+            { "territory.rdg_003.desc", "Volcanic sulfur pits providing essential components for heavy ordnance." },
+            { "territory.rdg_004.name", "Cinder Plateau" },
+            { "territory.rdg_004.desc", "Scorched volcanic tableland utilized for heavy armor testing." },
+            { "territory.rdg_005.name", "Magma Gate" },
+            { "territory.rdg_005.desc", "Heavily fortified redoubt guarding the southern frontier pass." },
+
+            // Factions (4)
+            { "faction.allied", "Allied Coalition" },
+            { "faction.neutral", "Neutral Territory" },
+            { "faction.hostile_red", "Crimson Pact" },
+            { "faction.hostile_blue", "Iron Syndicate" },
+
+            // Territory Detail Drawer & Legend UI
+            { "world.drawer.title", "Territory Dossier" },
+            { "world.drawer.yield", "Hourly Yield" },
+            { "world.drawer.defense", "Garrison Power" },
+            { "world.drawer.owner", "Controlling Faction" },
+            { "world.drawer.adjacent", "Connected Frontiers" },
+            { "world.drawer.action_attack", "Attack" },
+            { "world.drawer.action_scout", "Scout" },
+            { "world.drawer.phase9_note", "Combat operations unlock in Phase 9" },
+            { "world.legend.title", "Theater Factions" }
         };
 
         public static readonly Dictionary<string, string> ArabicTable = new Dictionary<string, string>
@@ -103,7 +192,96 @@ namespace KingWorldWar.Infrastructure.Localization
             { "dialog.switch_lang_title", "تم تغيير اللغة" },
             { "dialog.switch_lang_msg", "تم تحديث لغة الواجهة بنجاح." },
             { "dialog.error_title", "خطأ تكتيكي" },
-            { "dialog.error_generic", "حدث خطأ غير متوقع في العمليات. يرجى إعادة المحاولة." }
+            { "dialog.error_generic", "حدث خطأ غير متوقع في العمليات. يرجى إعادة المحاولة." },
+
+            // Regions (5)
+            { "region.north.name", "مرتفعات الشمال" },
+            { "region.north.desc", "هضاب جليدية وتندرا جبلية وممرات وعرة ومناجم حديد وفيرة." },
+            { "region.coast.name", "حوض الساحل الفولاذي" },
+            { "region.coast.desc", "مرافئ صناعية، قنوات بحرية، ومستودعات وقود ونفط استراتيجية." },
+            { "region.oasis.name", "جبهة الواحة الكبرى" },
+            { "region.oasis.desc", "هضبة صحراوية قاحلة، كثبان حارقة، وآبار طاقة ومعابر تكتيكية." },
+            { "region.valley.name", "الوادي الخصيب" },
+            { "region.valley.desc", "سهول زراعية مروية، معابر نهرية، ومقر القيادة المركزي." },
+            { "region.ridge.name", "حافة الأوبسيديان" },
+            { "region.ridge.desc", "قمم بركانية سوداء، قلاع جبلية، ومصاهر أسلحة وذخائر ثقيلة." },
+
+            // North Territories (5)
+            { "territory.nrd_001.name", "معقل قمة الجليد" },
+            { "territory.nrd_001.desc", "قلعة جبلية حصينة على قمة المرتفعات تمثل المقر القيادي لشمال البلاد." },
+            { "territory.nrd_002.name", "ممر الشفق الشمالي" },
+            { "territory.nrd_002.desc", "ممر جليدي ضيق يخترق السلاسل الجبلية الشمالية الوعرة." },
+            { "territory.nrd_003.name", "وادي الصخر الحديدي" },
+            { "territory.nrd_003.desc", "أخدود تعدين عميق ينتج خامات الحديد عالية الجودة لتصنيع العتاد الحربي." },
+            { "territory.nrd_004.name", "مرصد الحافة الجليدية" },
+            { "territory.nrd_004.desc", "محطة رصد ومراقبة متقدمة تطل على المسارات البحرية الشمالية." },
+            { "territory.nrd_005.name", "تندرا فالكن" },
+            { "territory.nrd_005.desc", "سهول متجمدة مفتوحة تلائم المناورات السريعة لقوات المدرعات." },
+
+            // Coast Territories (5)
+            { "territory.cst_001.name", "مرسى الخليج الفولاذي" },
+            { "territory.cst_001.desc", "ميناء مياه عميقة وقاعدة بحرية كبرى تسيطر على الممرات المائية الغربية." },
+            { "territory.cst_002.name", "أرصفة القرمز الصناعية" },
+            { "territory.cst_002.desc", "أحواض بناء وسفن شحن ورافعات تفريغ ومستودعات صيانة ساحلية ضخمة." },
+            { "territory.cst_003.name", "دلتا الرمح الثلاثي" },
+            { "territory.cst_003.desc", "أراضي دلتا نهرية ثلاثية تشكل جسر العبور التكتيكي نحو الوادي المركزي." },
+            { "territory.cst_004.name", "مستودع سبخات الملح" },
+            { "territory.cst_004.desc", "خزانات وقود ومستودعات محروقات مموهة بين السبخات الملحية الساحلية." },
+            { "territory.cst_005.name", "رأس الفنار العسكري" },
+            { "territory.cst_005.desc", "رأس ساحلي حصين مجهز ببطاريات مدفعية ساحلية لمراقبة حركة الملاحة." },
+
+            // Oasis Territories (5)
+            { "territory.oas_001.name", "قلعة شمس الصحراء" },
+            { "territory.oas_001.desc", "قلعة حجرية مهيبة تقف بشموخ في وجه العواصف الرملية الصحراوية." },
+            { "territory.oas_002.name", "كثبان السراب الكبرى" },
+            { "territory.oas_002.desc", "بحر رمال متحرك يخفي في باطنه مكامن نفطية استراتيجية بالغة الأهمية." },
+            { "territory.oas_003.name", "آبار الذهب الأسود" },
+            { "territory.oas_003.desc", "مجمع تكرير وإنتاج محروقات يمد الآليات العسكرية المتقدمة بالوقود." },
+            { "territory.oas_004.name", "ممر قلعة الرياح" },
+            { "territory.oas_004.desc", "خانق جبلي شديد الرياح يحرس المدخل الشرقي للعمق الصحراوي." },
+            { "territory.oas_005.name", "معبر القوافل التكتيكي" },
+            { "territory.oas_005.desc", "ملتقى قوافل تاريخي تحول إلى مركز إمداد ولوجستيات مسلحة في عمق الصحراء." },
+
+            // Valley Territories (5)
+            { "territory.val_001.name", "ملتقى الزمرد المركزي" },
+            { "territory.val_001.desc", "عاصمة القيادة المركزية ومفترق الطرق الاستراتيجي الرابط بين كافة الأقاليم." },
+            { "territory.val_002.name", "جسر النهر الفضي" },
+            { "territory.val_002.desc", "جسر مدرع استراتيجي يعبر فوق نهر الفضة الأكبر لربط الوادي بالساحل." },
+            { "territory.val_003.name", "مخازن السهول الذهبية" },
+            { "territory.val_003.desc", "سهول زراعية ممتدة تؤمن إيرادات تجارية هامة ومؤونة حيوية للجيوش." },
+            { "territory.val_004.name", "غابات الهمس الدفاعية" },
+            { "territory.val_004.desc", "غابات كثيفة قديمة توفر غطاءً دفاعياً طبيعياً وفرصاً مثالية للكمائن." },
+            { "territory.val_005.name", "مرتفعات الكهرمان" },
+            { "territory.val_005.desc", "مرتفعات تلال هادئة تتيح رصداً بانورامياً واسعاً لمفترق الطرق المركزي." },
+
+            // Ridge Territories (5)
+            { "territory.rdg_001.name", "معقل مصهر الرماد" },
+            { "territory.rdg_001.desc", "معقل عسكري تحت الأرض يستمد طاقته من الحرارة الجوفية البركانية." },
+            { "territory.rdg_002.name", "أخدود البازلت الأسود" },
+            { "territory.rdg_002.desc", "أخدود صخري أسود شاهق الارتفاع يشكل حاجزاً دفاعياً طبيعياً منيعاً." },
+            { "territory.rdg_003.name", "مناجم الكبريت والبارود" },
+            { "territory.rdg_003.desc", "مناجم كبريتية بركانية توفر المواد الأساسية لصناعة المتفجرات والذخيرة." },
+            { "territory.rdg_004.name", "هضبة الجمر الملتهب" },
+            { "territory.rdg_004.desc", "هضبة بركانية مستوية تستخدم لاختبارات وتدريبات الدبابات والمدرعات الثقيلة." },
+            { "territory.rdg_005.name", "بوابة الحمم الحصينة" },
+            { "territory.rdg_005.desc", "حصن دفاعي متقدم وشديد التحصين يحرس الممر الحدودي الجنوبي للخريطة." },
+
+            // Factions (4)
+            { "faction.allied", "التحالف الحليف" },
+            { "faction.neutral", "أراضٍ محايدة" },
+            { "faction.hostile_red", "حلف القرمز المعادي" },
+            { "faction.hostile_blue", "نقابة الحديد المعادية" },
+
+            // Territory Detail Drawer & Legend UI
+            { "world.drawer.title", "ملف المقاطعة التكتيكي" },
+            { "world.drawer.yield", "الإنتاج في الساعة" },
+            { "world.drawer.defense", "قوة الحامية العسكرية" },
+            { "world.drawer.owner", "الجهة المسيطرة" },
+            { "world.drawer.adjacent", "الحدود المتصلة" },
+            { "world.drawer.action_attack", "هجوم" },
+            { "world.drawer.action_scout", "استطلاع" },
+            { "world.drawer.phase9_note", "ستتاح العمليات القتالية في المرحلة 9" },
+            { "world.legend.title", "دليل القوى في مسرح العمليات" }
         };
     }
 }

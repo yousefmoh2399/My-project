@@ -7,6 +7,8 @@
     "KingWorldWar.UI",
     "KingWorldWar.App",
     "KingWorldWar.Features.Camera",
+    "KingWorldWar.Features.WorldMap",
+    "Unity.TextMeshPro",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"
   ],

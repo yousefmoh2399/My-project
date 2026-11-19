@@ -1,11 +1,16 @@
 using KingWorldWar.Core.Localization;
 using KingWorldWar.Core.Logging;
 using KingWorldWar.Core.UI;
+using KingWorldWar.Core.WorldMap;
+using KingWorldWar.Features.Camera;
+using KingWorldWar.Features.WorldMap;
 using KingWorldWar.Infrastructure.Localization;
 using KingWorldWar.Infrastructure.UI;
+using KingWorldWar.Infrastructure.WorldMap;
 using KingWorldWar.UI.Common;
 using KingWorldWar.UI.Modals;
 using KingWorldWar.UI.Shell;
+using KingWorldWar.UI.WorldMap;
 using UnityEngine;
 
 namespace KingWorldWar.App
@@ -16,10 +21,15 @@ namespace KingWorldWar.App
     /// </summary>
     public class MainMenuScope : MonoBehaviour
     {
-        [Header("Views")]
+        [Header("Shell & UI Views")]
         [SerializeField] private MainMenuShellView _shellView;
         [SerializeField] private ModalDialogView _modalView;
         [SerializeField] private ResourceHeaderView _resourceHeaderView;
+
+        [Header("World Map")]
+        [SerializeField] private WorldMapView _worldMapView;
+        [SerializeField] private TerritoryDetailDrawer _territoryDetailDrawer;
+        [SerializeField] private StrategyCameraRig _cameraRig;
 
         public MainMenuShellView ShellView
         {
@@ -39,9 +49,28 @@ namespace KingWorldWar.App
             set => _resourceHeaderView = value;
         }
 
+        public WorldMapView WorldMapView
+        {
+            get => _worldMapView;
+            set => _worldMapView = value;
+        }
+
+        public TerritoryDetailDrawer TerritoryDetailDrawer
+        {
+            get => _territoryDetailDrawer;
+            set => _territoryDetailDrawer = value;
+        }
+
+        public StrategyCameraRig CameraRig
+        {
+            get => _cameraRig;
+            set => _cameraRig = value;
+        }
+
         public IScreenNavigationService NavigationService { get; private set; }
         public ILocalizationService LocalizationService { get; private set; }
         public IModalService ModalService { get; private set; }
+        public IWorldMapService WorldMapService { get; private set; }
 
         private void Start()
         {
@@ -57,9 +86,22 @@ namespace KingWorldWar.App
             var nav = container.TryResolve<IScreenNavigationService>(out var ns) ? ns : new ScreenNavigationService(log);
             var modal = container.TryResolve<IModalService>(out var ms) ? ms : new ModalService(log);
 
+            // World Map fallback if scene launched directly
+            if (!container.TryResolve<IWorldMapService>(out var mapService))
+            {
+                var worldMapConfig = ScriptableObject.CreateInstance<WorldMapConfigSO>();
+                worldMapConfig.InitializeFromDefaults();
+                var stateRepo = new InMemoryTerritoryStateRepository(worldMapConfig);
+                mapService = new WorldMapService(worldMapConfig, stateRepo, log);
+                container.Register<ITerritoryDataSource>(worldMapConfig);
+                container.Register<ITerritoryStateRepository>(stateRepo);
+                container.Register<IWorldMapService>(mapService);
+            }
+
             NavigationService = nav;
             LocalizationService = loc;
             ModalService = modal;
+            WorldMapService = mapService;
 
             if (!container.TryResolve<ILocalizationService>(out _))
                 container.Register<ILocalizationService>(loc);
@@ -84,8 +126,18 @@ namespace KingWorldWar.App
                 _resourceHeaderView.SetManualValues(125000, 48000, 89000);
             }
 
+            if (_worldMapView != null)
+            {
+                _worldMapView.Bind(mapService, loc, _cameraRig);
+            }
+
+            if (_territoryDetailDrawer != null)
+            {
+                _territoryDetailDrawer.Bind(mapService, loc);
+            }
+
             // Bind any LocalizedText components in scene
-            var localizedTexts = FindObjectsByType<LocalizedText>(FindObjectsSortMode.None);
+            var localizedTexts = Object.FindObjectsByType<LocalizedText>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             foreach (var lt in localizedTexts)
             {
                 lt.Bind(loc);

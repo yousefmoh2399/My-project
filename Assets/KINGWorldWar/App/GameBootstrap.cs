@@ -7,11 +7,13 @@ using KingWorldWar.Core.Networking;
 using KingWorldWar.Core.Quality;
 using KingWorldWar.Core.Scenes;
 using KingWorldWar.Core.UI;
+using KingWorldWar.Core.WorldMap;
 using KingWorldWar.Infrastructure.Config;
 using KingWorldWar.Infrastructure.Localization;
 using KingWorldWar.Infrastructure.Quality;
 using KingWorldWar.Infrastructure.Scenes;
 using KingWorldWar.Infrastructure.UI;
+using KingWorldWar.Infrastructure.WorldMap;
 using KingWorldWar.UI.ErrorScreen;
 using UnityEngine;
 
@@ -125,6 +127,16 @@ namespace KingWorldWar.App
             container.Register<ILocalizationService>(new LocalizationService(log));
             container.Register<IScreenNavigationService>(new ScreenNavigationService(log));
             container.Register<IModalService>(new ModalService(log));
+
+            var worldMapConfig = ScriptableObject.CreateInstance<WorldMapConfigSO>();
+            worldMapConfig.InitializeFromDefaults();
+            var territoryRepo = new InMemoryTerritoryStateRepository(worldMapConfig);
+            var worldMapService = new WorldMapService(worldMapConfig, territoryRepo, log);
+
+            container.Register<ITerritoryDataSource>(worldMapConfig);
+            container.Register<ITerritoryStateRepository>(territoryRepo);
+            container.Register<IWorldMapService>(worldMapService);
+
             container.Register<IAuthService>(new NullAuthService());
             container.Register<IPlayerRepository>(new NullPlayerRepository());
 

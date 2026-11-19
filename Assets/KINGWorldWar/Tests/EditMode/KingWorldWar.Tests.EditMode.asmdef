@@ -6,6 +6,7 @@
     "KingWorldWar.Infrastructure",
     "KingWorldWar.UI",
     "KingWorldWar.App",
+    "KingWorldWar.Features.WorldMap",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"
   ],

@@ -1,7 +1,7 @@
 # PROJECT STATE — KING WORLD WAR
 
-**Last Updated:** Phase 03 (UI Foundation & Localization — Arabic RTL + English)  
-**Active Branch:** `phase-03/ui-localization`  
+**Last Updated:** Phase 04 (World Map & Strategic Territories — 5 Regions, 25 Territories)  
+**Active Branch:** `phase-04/world-map`  
 **Engine:** Unity 6 (`6000.6.9f1`)  
 **Active Render Pipeline:** Universal Render Pipeline (URP 17.6.0)
 
@@ -64,6 +64,30 @@
   - 21 PlayMode tests (including 7 `MainMenuNavigationTests` and updated `BootstrapFlowTests`).
   - **74 total automated tests (100% pass rate, 0 errors, 0 warnings).**
 
+### Phase 04 — World Map & Strategic Territories (5 Regions, 25 Territories)
+- **Data-Driven Strategic World Model:**
+  - 5 fictional regions: Northern Tundra (`reg_north`), Coastal Basin (`reg_coast`), Emerald Oasis (`reg_oasis`), Verdant Valley (`reg_valley`), Iron Ridge (`reg_ridge`).
+  - 25 gameplay territories (5 per region, IDs `ter_nrd_001`..`005`, `ter_cst_001`..`005`, `ter_oas_001`..`005`, `ter_val_001`..`005`, `ter_rdg_001`..`005`).
+  - Clean separation: Immutable definition (`TerritoryData`) vs Dynamic state (`TerritoryRuntimeState`), explicitly marked non-authoritative client cache until server sync in Phase 8/9.
+  - Resource yield model (`ResourceYield`) with Gold, Oil, and Iron yields per hour.
+  - ScriptableObject storage (`WorldMapConfigSO`) implementing `ITerritoryDataSource`.
+- **Pure C# Topology Graph & Routing:**
+  - `TerritoryGraph` validates bidirectional symmetry (`ValidateBidirectionalAdjacency`), connectivity of all 25 nodes, and computes shortest path via BFS routing (`FindShortestPath`).
+- **3D Interactive World Map:**
+  - `TerritoryView`: 3D visual territory node with terrain tinting, selection ring indicator, and world-space info billboard.
+  - `WorldMapView`: Dynamic territory spawning, raycast tap selection with mouse and mobile touch (`EnhancedTouchSupport` guarded), UI click rejection (`IsPointerOverGameObject`), and smooth camera targeting via `StrategyCameraRig`.
+- **UI Territory Details Drawer:**
+  - `TerritoryDetailDrawer`: Slide-in panel showing territory name, region badge, non-authoritative yields and defense power, frontier connections, disabled Attack/Scout buttons ("Coming in Phase 9"), and accessibility colorblind legend (`★`, `◆`, `✖`, `▲`).
+- **Bilingual Military Localization:**
+  - 100% string key parity in Arabic RTL and English for all 25 territory names, 25 descriptions, 5 region names/lore, and drawer UI actions.
+  - Flagged all 30 region and territory Arabic terms in `docs/localization/REVIEW_QUEUE.md` as "Needs Human Review".
+- **Documentation & Authoring Guides:**
+  - Created `docs/world/ADDING_TERRITORIES.md` and `docs/WORLD_MAP_SPEC.md`.
+- **Automated Test Coverage:**
+  - **68 EditMode tests** (including 7 new `TerritoryGraphTests` and 8 new `WorldMapDataTests`).
+  - **31 PlayMode tests** (including 10 new `WorldMapInteractionTests` verifying raycast selection, camera focus, UI click isolation, and drawer data binding).
+  - **99 total automated tests across all suites (100% pass rate, 0 failed, 0 errors).**
+
 ---
 
 ## 2. DECISIONS REGISTER
@@ -75,6 +99,7 @@
 - **Localization & BiDi Strategy:** Custom pure C# string table engine with zero third-party packages ($0 cost). Pure C# contextual Arabic shaping converting to Presentation Forms-B and preserving LTR digit order for TextMeshPro. Strict key parity enforced via automated unit tests.
 - **Accessibility & Touch Targets:** All interactive buttons enforce minimum dimensions of 48x48dp per mobile accessibility standards (Apple HIG and Google Material).
 - **Client Trust:** Zero authoritative logic on the client; currency and battle resolution reserved for Nakama server.
+- **ADR-0004 (World Map Topology & Untrusted Client):** All 25 territories and 5 regions are declared via pure C# domain contracts and immutable ScriptableObject configs. The graph topology enforces 100% bidirectional symmetry and single-component connectivity. All territory runtime values (yields, defense, ownership) are strictly non-authoritative client displays with explicit warnings until server-synchronized in Phase 8/9. Colorblind accessibility symbols (`★`, `◆`, `✖`, `▲`) accompany faction colors.
 
 ---
 
@@ -90,6 +115,14 @@
 ---
 
 ## 4. HOW TO RUN
+
+### Running the World Map in Main Menu
+1. Open `Assets/KINGWorldWar/Scenes/MainMenu.unity`.
+2. Enter Play Mode.
+3. Click or tap any 3D territory tile to select it; the camera smoothly pans to center on the selected territory.
+4. Observe the slide-in Territory Detail Drawer displaying territory intelligence, resource yields, defense power, frontier connections, and faction accessibility symbols.
+5. Tap the "عربي" / "EN" button in the top navigation bar to observe instant real-time bilingual switching and Arabic RTL shaping across all territory details.
+6. Click the Close ("X") button or tap another territory to switch selection.
 
 ### Running the Visual Test Scene
 1. Open `Assets/KINGWorldWar/Scenes/VisualTest.unity`.

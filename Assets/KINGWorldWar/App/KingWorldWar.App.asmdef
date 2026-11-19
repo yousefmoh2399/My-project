@@ -4,7 +4,9 @@
   "references": [
     "KingWorldWar.Core",
     "KingWorldWar.Infrastructure",
-    "KingWorldWar.UI"
+    "KingWorldWar.UI",
+    "KingWorldWar.Features.Camera",
+    "KingWorldWar.Features.WorldMap"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

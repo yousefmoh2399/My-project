@@ -28,6 +28,24 @@
 | `placeholder.profile.desc` | Commander progression, medals, and operational records will unlock in Phase 9. | ستتاح الرتب العسكرية والأوسمة والسجل العملياتي في المرحلة 9. | Progression / Honors | `Needs Human Review` | "الرتب العسكرية" (military ranks), "الأوسمة" (decorations/medals). |
 | `dialog.confirm_title` | Confirm Action | تأكيد الأمر | Dialog / Orders | `Needs Human Review` | "تأكيد الأمر" (confirm order) gives appropriate military flavor. |
 | `dialog.confirm_exit_msg` | Are you sure you want to exit King World War? | هل أنت متأكد من مغادرة مسرح العمليات؟ | Dialog / System | `Needs Human Review` | "مغادرة مسرح العمليات" gives immersive tactical flavor. |
+| `region.reg_north.name` | Northern Tundra | الجبهة الشمالية | World Map / Region | `Needs Human Review` | Fictional northern theater. |
+| `region.reg_coast.name` | Coastline Dominion | ساحل الهيمنة | World Map / Region | `Needs Human Review` | Fictional coastal theater. |
+| `region.reg_oasis.name` | Emerald Oasis | واحة الزمرد | World Map / Region | `Needs Human Review` | Fictional desert fuel hub. |
+| `region.reg_valley.name` | Iron Valley | وادي الحديد | World Map / Region | `Needs Human Review` | Fictional central industrial basin. |
+| `region.reg_ridge.name` | Obsidian Ridge | هضبة الأوبسيديان | World Map / Region | `Needs Human Review` | Fictional eastern mountain ridge. |
+| `faction.neutral` | Neutral | محايد | World Map / Factions | `Needs Human Review` | Local militia/unclaimed forces. |
+| `faction.player` | Player Faction | القيادة الوطنية | World Map / Factions | `Needs Human Review` | Player alliance / coalition forces. |
+| `faction.enemy` | Enemy Alliance | قوات العدو | World Map / Factions | `Needs Human Review` | Hostile syndicate / rival alliance. |
+| `faction.rebels` | Rebel Outpost | بؤرة متمردين | World Map / Factions | `Needs Human Review` | Rogue insurgent outposts. |
+| `drawer.btn.attack` | Attack Territory | شن هجوم | World Map / UI | `Needs Human Review` | Tactical assault action. |
+| `drawer.btn.scout` | Recon & Scout | استطلاع استخباراتي | World Map / UI | `Needs Human Review` | Military reconnaissance operation. |
+| `drawer.btn.legend` | Map Legend | رموز الخريطة | World Map / Accessibility | `Needs Human Review` | Colorblind symbol accessibility guide. |
+| `drawer.unlocked_in_phase9` | Tactical operations unlock in Phase 9 (Battle Engine) | العمليات القتالية ستتاح في المرحلة 9 | World Map / System | `Needs Human Review` | Disclaimer for disabled action buttons. |
+| `territory.ter_nrd_001.name` | Frostpeak Citadel | قلعة قمة الجليد | Territory / Northern | `Needs Human Review` | Northern capital fortress. |
+| `territory.ter_cst_001.name` | Harbor Prime | الميناء الرئيسي | Territory / Coastline | `Needs Human Review` | Coastline capital port. |
+| `territory.ter_oas_001.name` | Palm Oasis | واحة النخيل | Territory / Oasis | `Needs Human Review` | Oasis capital oasis hub. |
+| `territory.ter_val_001.name` | Iron Bastion | حصن الحديد | Territory / Valley | `Needs Human Review` | Valley capital fortress. |
+| `territory.ter_rdg_001.name` | Ridge Spire | برج الهضبة | Territory / Ridge | `Needs Human Review` | Ridge capital mountain spire. |
 
 ---
 

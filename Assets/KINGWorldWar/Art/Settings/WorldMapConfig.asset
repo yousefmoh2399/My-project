@@ -1,0 +1,413 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 203205023c60e46a496bd47e013d3359, type: 3}
+  m_Name: WorldMapConfig
+  m_EditorClassIdentifier: KingWorldWar.Infrastructure::KingWorldWar.Infrastructure.WorldMap.WorldMapConfigSO
+  _regions:
+  - _id: reg_north
+    _nameKey: region.north.name
+    _descriptionKey: region.north.desc
+    _primaryResource: Iron
+    _themeColor: {r: 0.2901961, g: 0.33333334, b: 0.40784314, a: 1}
+  - _id: reg_coast
+    _nameKey: region.coast.name
+    _descriptionKey: region.coast.desc
+    _primaryResource: Oil
+    _themeColor: {r: 0.23137255, g: 0.43137255, b: 0.54901963, a: 1}
+  - _id: reg_oasis
+    _nameKey: region.oasis.name
+    _descriptionKey: region.oasis.desc
+    _primaryResource: Oil & Gold
+    _themeColor: {r: 0.83137256, g: 0.6862745, b: 0.21568628, a: 1}
+  - _id: reg_valley
+    _nameKey: region.valley.name
+    _descriptionKey: region.valley.desc
+    _primaryResource: Gold & Supplies
+    _themeColor: {r: 0.24313726, g: 0.30588236, b: 0.23921569, a: 1}
+  - _id: reg_ridge
+    _nameKey: region.ridge.name
+    _descriptionKey: region.ridge.desc
+    _primaryResource: Iron & Ordnance
+    _themeColor: {r: 0.3529412, g: 0.16470589, b: 0.15294118, a: 1}
+  _territories:
+  - _id: ter_nrd_001
+    _regionId: reg_north
+    _nameKey: territory.nrd_001.name
+    _descriptionKey: territory.nrd_001.desc
+    _type: 0
+    _mapPosition: {x: 0, y: 0, z: 90}
+    _baseYield:
+      _goldPerHour: 500
+      _oilPerHour: 200
+      _ironPerHour: 1800
+    _garrisonDefenseRating: 4500
+    _adjacentTerritoryIds:
+    - ter_nrd_002
+    - ter_nrd_003
+  - _id: ter_nrd_002
+    _regionId: reg_north
+    _nameKey: territory.nrd_002.name
+    _descriptionKey: territory.nrd_002.desc
+    _type: 2
+    _mapPosition: {x: -25, y: 0, z: 70}
+    _baseYield:
+      _goldPerHour: 300
+      _oilPerHour: 150
+      _ironPerHour: 1200
+    _garrisonDefenseRating: 3000
+    _adjacentTerritoryIds:
+    - ter_nrd_001
+    - ter_nrd_004
+    - ter_val_001
+  - _id: ter_nrd_003
+    _regionId: reg_north
+    _nameKey: territory.nrd_003.name
+    _descriptionKey: territory.nrd_003.desc
+    _type: 3
+    _mapPosition: {x: 25, y: 0, z: 70}
+    _baseYield:
+      _goldPerHour: 400
+      _oilPerHour: 100
+      _ironPerHour: 2200
+    _garrisonDefenseRating: 2800
+    _adjacentTerritoryIds:
+    - ter_nrd_001
+    - ter_nrd_005
+    - ter_rdg_002
+  - _id: ter_nrd_004
+    _regionId: reg_north
+    _nameKey: territory.nrd_004.name
+    _descriptionKey: territory.nrd_004.desc
+    _type: 4
+    _mapPosition: {x: -50, y: 0, z: 60}
+    _baseYield:
+      _goldPerHour: 250
+      _oilPerHour: 100
+      _ironPerHour: 1000
+    _garrisonDefenseRating: 2200
+    _adjacentTerritoryIds:
+    - ter_nrd_002
+    - ter_nrd_005
+    - ter_cst_005
+  - _id: ter_nrd_005
+    _regionId: reg_north
+    _nameKey: territory.nrd_005.name
+    _descriptionKey: territory.nrd_005.desc
+    _type: 5
+    _mapPosition: {x: 0, y: 0, z: 55}
+    _baseYield:
+      _goldPerHour: 350
+      _oilPerHour: 250
+      _ironPerHour: 1100
+    _garrisonDefenseRating: 2500
+    _adjacentTerritoryIds:
+    - ter_nrd_003
+    - ter_nrd_004
+    - ter_val_004
+  - _id: ter_cst_001
+    _regionId: reg_coast
+    _nameKey: territory.cst_001.name
+    _descriptionKey: territory.cst_001.desc
+    _type: 0
+    _mapPosition: {x: -85, y: 0, z: -20}
+    _baseYield:
+      _goldPerHour: 800
+      _oilPerHour: 1600
+      _ironPerHour: 600
+    _garrisonDefenseRating: 4200
+    _adjacentTerritoryIds:
+    - ter_cst_002
+    - ter_cst_003
+  - _id: ter_cst_002
+    _regionId: reg_coast
+    _nameKey: territory.cst_002.name
+    _descriptionKey: territory.cst_002.desc
+    _type: 3
+    _mapPosition: {x: -65, y: 0, z: 0}
+    _baseYield:
+      _goldPerHour: 600
+      _oilPerHour: 2000
+      _ironPerHour: 500
+    _garrisonDefenseRating: 3200
+    _adjacentTerritoryIds:
+    - ter_cst_001
+    - ter_cst_004
+    - ter_val_002
+  - _id: ter_cst_003
+    _regionId: reg_coast
+    _nameKey: territory.cst_003.name
+    _descriptionKey: territory.cst_003.desc
+    _type: 2
+    _mapPosition: {x: -70, y: 0, z: -45}
+    _baseYield:
+      _goldPerHour: 500
+      _oilPerHour: 1200
+      _ironPerHour: 700
+    _garrisonDefenseRating: 3100
+    _adjacentTerritoryIds:
+    - ter_cst_001
+    - ter_cst_004
+    - ter_rdg_005
+  - _id: ter_cst_004
+    _regionId: reg_coast
+    _nameKey: territory.cst_004.name
+    _descriptionKey: territory.cst_004.desc
+    _type: 4
+    _mapPosition: {x: -50, y: 0, z: -25}
+    _baseYield:
+      _goldPerHour: 450
+      _oilPerHour: 1400
+      _ironPerHour: 550
+    _garrisonDefenseRating: 2400
+    _adjacentTerritoryIds:
+    - ter_cst_002
+    - ter_cst_003
+    - ter_cst_005
+  - _id: ter_cst_005
+    _regionId: reg_coast
+    _nameKey: territory.cst_005.name
+    _descriptionKey: territory.cst_005.desc
+    _type: 1
+    _mapPosition: {x: -55, y: 0, z: 25}
+    _baseYield:
+      _goldPerHour: 400
+      _oilPerHour: 900
+      _ironPerHour: 800
+    _garrisonDefenseRating: 3500
+    _adjacentTerritoryIds:
+    - ter_cst_004
+    - ter_nrd_004
+    - ter_val_004
+  - _id: ter_oas_001
+    _regionId: reg_oasis
+    _nameKey: territory.oas_001.name
+    _descriptionKey: territory.oas_001.desc
+    _type: 0
+    _mapPosition: {x: 85, y: 0, z: -20}
+    _baseYield:
+      _goldPerHour: 1200
+      _oilPerHour: 1800
+      _ironPerHour: 400
+    _garrisonDefenseRating: 4600
+    _adjacentTerritoryIds:
+    - ter_oas_002
+    - ter_oas_003
+  - _id: ter_oas_002
+    _regionId: reg_oasis
+    _nameKey: territory.oas_002.name
+    _descriptionKey: territory.oas_002.desc
+    _type: 5
+    _mapPosition: {x: 65, y: 0, z: 5}
+    _baseYield:
+      _goldPerHour: 900
+      _oilPerHour: 1500
+      _ironPerHour: 300
+    _garrisonDefenseRating: 2700
+    _adjacentTerritoryIds:
+    - ter_oas_001
+    - ter_oas_004
+    - ter_val_003
+  - _id: ter_oas_003
+    _regionId: reg_oasis
+    _nameKey: territory.oas_003.name
+    _descriptionKey: territory.oas_003.desc
+    _type: 3
+    _mapPosition: {x: 70, y: 0, z: -45}
+    _baseYield:
+      _goldPerHour: 600
+      _oilPerHour: 2400
+      _ironPerHour: 350
+    _garrisonDefenseRating: 3400
+    _adjacentTerritoryIds:
+    - ter_oas_001
+    - ter_oas_005
+    - ter_rdg_004
+  - _id: ter_oas_004
+    _regionId: reg_oasis
+    _nameKey: territory.oas_004.name
+    _descriptionKey: territory.oas_004.desc
+    _type: 2
+    _mapPosition: {x: 45, y: 0, z: -10}
+    _baseYield:
+      _goldPerHour: 700
+      _oilPerHour: 1100
+      _ironPerHour: 500
+    _garrisonDefenseRating: 3200
+    _adjacentTerritoryIds:
+    - ter_oas_002
+    - ter_oas_005
+    - ter_val_005
+  - _id: ter_oas_005
+    _regionId: reg_oasis
+    _nameKey: territory.oas_005.name
+    _descriptionKey: territory.oas_005.desc
+    _type: 4
+    _mapPosition: {x: 50, y: 0, z: -40}
+    _baseYield:
+      _goldPerHour: 550
+      _oilPerHour: 1300
+      _ironPerHour: 450
+    _garrisonDefenseRating: 2300
+    _adjacentTerritoryIds:
+    - ter_oas_003
+    - ter_oas_004
+    - ter_rdg_003
+  - _id: ter_val_001
+    _regionId: reg_valley
+    _nameKey: territory.val_001.name
+    _descriptionKey: territory.val_001.desc
+    _type: 0
+    _mapPosition: {x: 0, y: 0, z: 20}
+    _baseYield:
+      _goldPerHour: 2000
+      _oilPerHour: 800
+      _ironPerHour: 800
+    _garrisonDefenseRating: 5000
+    _adjacentTerritoryIds:
+    - ter_val_002
+    - ter_val_003
+    - ter_val_004
+    - ter_nrd_002
+  - _id: ter_val_002
+    _regionId: reg_valley
+    _nameKey: territory.val_002.name
+    _descriptionKey: territory.val_002.desc
+    _type: 2
+    _mapPosition: {x: -25, y: 0, z: 0}
+    _baseYield:
+      _goldPerHour: 1100
+      _oilPerHour: 700
+      _ironPerHour: 600
+    _garrisonDefenseRating: 3300
+    _adjacentTerritoryIds:
+    - ter_val_001
+    - ter_val_005
+    - ter_cst_002
+  - _id: ter_val_003
+    _regionId: reg_valley
+    _nameKey: territory.val_003.name
+    _descriptionKey: territory.val_003.desc
+    _type: 3
+    _mapPosition: {x: 25, y: 0, z: 0}
+    _baseYield:
+      _goldPerHour: 1800
+      _oilPerHour: 600
+      _ironPerHour: 500
+    _garrisonDefenseRating: 3000
+    _adjacentTerritoryIds:
+    - ter_val_001
+    - ter_val_005
+    - ter_oas_002
+  - _id: ter_val_004
+    _regionId: reg_valley
+    _nameKey: territory.val_004.name
+    _descriptionKey: territory.val_004.desc
+    _type: 1
+    _mapPosition: {x: -25, y: 0, z: 35}
+    _baseYield:
+      _goldPerHour: 900
+      _oilPerHour: 500
+      _ironPerHour: 900
+    _garrisonDefenseRating: 3800
+    _adjacentTerritoryIds:
+    - ter_val_001
+    - ter_nrd_005
+    - ter_cst_005
+  - _id: ter_val_005
+    _regionId: reg_valley
+    _nameKey: territory.val_005.name
+    _descriptionKey: territory.val_005.desc
+    _type: 5
+    _mapPosition: {x: 0, y: 0, z: -10}
+    _baseYield:
+      _goldPerHour: 1300
+      _oilPerHour: 650
+      _ironPerHour: 700
+    _garrisonDefenseRating: 2600
+    _adjacentTerritoryIds:
+    - ter_val_002
+    - ter_val_003
+    - ter_oas_004
+  - _id: ter_rdg_001
+    _regionId: reg_ridge
+    _nameKey: territory.rdg_001.name
+    _descriptionKey: territory.rdg_001.desc
+    _type: 0
+    _mapPosition: {x: 0, y: 0, z: -80}
+    _baseYield:
+      _goldPerHour: 700
+      _oilPerHour: 600
+      _ironPerHour: 2200
+    _garrisonDefenseRating: 4800
+    _adjacentTerritoryIds:
+    - ter_rdg_002
+    - ter_rdg_003
+  - _id: ter_rdg_002
+    _regionId: reg_ridge
+    _nameKey: territory.rdg_002.name
+    _descriptionKey: territory.rdg_002.desc
+    _type: 2
+    _mapPosition: {x: 20, y: 0, z: -65}
+    _baseYield:
+      _goldPerHour: 500
+      _oilPerHour: 400
+      _ironPerHour: 1600
+    _garrisonDefenseRating: 3400
+    _adjacentTerritoryIds:
+    - ter_rdg_001
+    - ter_rdg_004
+    - ter_nrd_003
+  - _id: ter_rdg_003
+    _regionId: reg_ridge
+    _nameKey: territory.rdg_003.name
+    _descriptionKey: territory.rdg_003.desc
+    _type: 3
+    _mapPosition: {x: -20, y: 0, z: -65}
+    _baseYield:
+      _goldPerHour: 450
+      _oilPerHour: 500
+      _ironPerHour: 1900
+    _garrisonDefenseRating: 3100
+    _adjacentTerritoryIds:
+    - ter_rdg_001
+    - ter_rdg_005
+    - ter_oas_005
+  - _id: ter_rdg_004
+    _regionId: reg_ridge
+    _nameKey: territory.rdg_004.name
+    _descriptionKey: territory.rdg_004.desc
+    _type: 5
+    _mapPosition: {x: 30, y: 0, z: -85}
+    _baseYield:
+      _goldPerHour: 400
+      _oilPerHour: 550
+      _ironPerHour: 1400
+    _garrisonDefenseRating: 2500
+    _adjacentTerritoryIds:
+    - ter_rdg_002
+    - ter_rdg_005
+    - ter_oas_003
+  - _id: ter_rdg_005
+    _regionId: reg_ridge
+    _nameKey: territory.rdg_005.name
+    _descriptionKey: territory.rdg_005.desc
+    _type: 1
+    _mapPosition: {x: -30, y: 0, z: -85}
+    _baseYield:
+      _goldPerHour: 400
+      _oilPerHour: 450
+      _ironPerHour: 1800
+    _garrisonDefenseRating: 3900
+    _adjacentTerritoryIds:
+    - ter_rdg_003
+    - ter_rdg_004
+    - ter_cst_003
