@@ -31,6 +31,15 @@ namespace KingWorldWar.Core.Base
     }
 
     /// <summary>
+    /// Explicit contract for player base state queries and upgrade requests.
+    /// Specified in Work Order Phase 5.
+    /// </summary>
+    public interface IBaseRepository : IBaseStateRepository
+    {
+        bool IsMock { get; }
+    }
+
+    /// <summary>
     /// High-level domain service orchestrating player base interactions, building selection,
     /// and asynchronous upgrade workflows.
     /// </summary>

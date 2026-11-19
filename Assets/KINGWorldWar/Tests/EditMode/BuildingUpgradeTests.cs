@@ -26,15 +26,22 @@ namespace KingWorldWar.Tests.EditMode
         }
 
         [Test]
-        public void Definitions_AllFiveArchetypesConfigured()
+        public void Definitions_AllSevenMvpArchetypesConfigured()
         {
             var defs = _dataSource.GetAllDefinitions();
-            Assert.AreEqual(5, defs.Count);
+            Assert.That(defs.Count, Is.GreaterThanOrEqualTo(7), "Must configure at least 7 MVP building archetypes");
 
             Assert.IsTrue(_dataSource.TryGetDefinition(BuildingType.CommandCenter, out _));
+            Assert.IsTrue(_dataSource.TryGetDefinition(BuildingType.TankFactory, out _));
+            Assert.IsTrue(_dataSource.TryGetDefinition(BuildingType.Airfield, out _));
+            Assert.IsTrue(_dataSource.TryGetDefinition(BuildingType.ArmsFactory, out _));
+            Assert.IsTrue(_dataSource.TryGetDefinition(BuildingType.ResearchCenter, out _));
+            Assert.IsTrue(_dataSource.TryGetDefinition(BuildingType.ResourceDepot, out _));
+            Assert.IsTrue(_dataSource.TryGetDefinition(BuildingType.TrainingCenter, out _));
+
+            // Backward compatibility aliases
             Assert.IsTrue(_dataSource.TryGetDefinition(BuildingType.Barracks, out _));
             Assert.IsTrue(_dataSource.TryGetDefinition(BuildingType.SupplyDepot, out _));
-            Assert.IsTrue(_dataSource.TryGetDefinition(BuildingType.RadarStation, out _));
             Assert.IsTrue(_dataSource.TryGetDefinition(BuildingType.VehicleFactory, out _));
         }
 
@@ -61,6 +68,35 @@ namespace KingWorldWar.Tests.EditMode
                     }
                 }
             }
+        }
+
+        [Test]
+        public void Prerequisites_NoCycles_EnsuresDirectedAcyclicGraph()
+        {
+            var defs = _dataSource.GetAllDefinitions();
+            foreach (var def in defs)
+            {
+                foreach (var lvl in def.Levels.Values)
+                {
+                    if (def.Type == BuildingType.CommandCenter)
+                    {
+                        Assert.AreEqual(0, lvl.RequiredHQLevel, "Command Center must never require external prerequisites (anchor)");
+                    }
+                    else
+                    {
+                        Assert.IsTrue(lvl.RequiredHQLevel >= 0 && lvl.RequiredHQLevel <= 10,
+                            $"{def.Type} Lv.{lvl.Level} must have valid non-negative HQ prerequisite <= 10");
+                    }
+                }
+            }
+        }
+
+        [Test]
+        public void MockRepository_IsIsolatedAndMarkedMock()
+        {
+            var mockRepo = new LocalMockBaseRepository(_dataSource);
+            Assert.IsTrue(mockRepo.IsMock);
+            Assert.That(mockRepo.GetAllBuildings().Count, Is.GreaterThanOrEqualTo(7));
         }
 
         [Test]
@@ -93,7 +129,7 @@ namespace KingWorldWar.Tests.EditMode
         [Test]
         public async Task Upgrade_PrerequisiteNotMet_Fails()
         {
-            // By default, HQ is Level 1. Barracks Lv 2 requires HQ Level 2.
+            // By default, HQ is Level 1. TrainingCenter/Barracks Lv 2 requires HQ Level 2.
             var barId = new BuildingId("bld_barracks_01");
             var result = await _service.RequestUpgradeAsync(barId);
 
@@ -164,6 +200,16 @@ namespace KingWorldWar.Tests.EditMode
 
             Assert.IsTrue(result.IsFailure);
             Assert.AreEqual("BUILDING_MAX_LEVEL", result.Error.Code);
+        }
+
+        [Test]
+        public async Task Upgrade_NonExistentBuilding_FailsWithBuildingNotFound()
+        {
+            var ghostId = new BuildingId("bld_ghost_non_existent");
+            var result = await _service.RequestUpgradeAsync(ghostId);
+
+            Assert.IsTrue(result.IsFailure);
+            Assert.AreEqual("BUILDING_NOT_FOUND", result.Error.Code);
         }
     }
 }

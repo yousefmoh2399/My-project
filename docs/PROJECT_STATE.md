@@ -88,31 +88,39 @@
   - **31 PlayMode tests** (including 10 new `WorldMapInteractionTests` verifying raycast selection, camera focus, UI click isolation, and drawer data binding).
   - **99 total automated tests across all suites (100% pass rate, 0 failed, 0 errors).**
 
-### Phase 05 — Player Base & Building Systems
+### Phase 05 — Player Base & Building Systems (Full Work Order Compliance)
 - **Tactical 2D Base Grid (`BaseGrid`):**
   - $20 \times 20$ cell grid with $4.0\text{m} \times 4.0\text{m}$ cell world dimensions.
   - Cell occupancy tracking with rectangular footprint collision validation.
   - Relocation / Move validation ensuring target cells are vacant (ignoring building's own current cells).
-- **Core Domain & Building Archetypes:**
-  - 5 core military structures: Command Center (`CommandCenter`), Barracks (`Barracks`), Supply Depot (`SupplyDepot`), Radar Station (`RadarStation`), Vehicle Factory (`VehicleFactory`).
-  - Progression balance curves for Levels 1–10 with Gold, Oil, Iron costs, construction durations in seconds, and HQ prerequisite gates.
-  - Pure C# abstractions `IBuildingDataSource`, `IBaseStateRepository`, `IPlayerBaseService`.
-- **Untrusted Client Security:**
+- **Core Domain & All 7 MVP Building Archetypes:**
+  - All 7 MVP buildings fully configured with balanced 10-level progression curves:
+    1. Command Center (`bld_command_center` / `bld_hq`): $4 \times 4$ footprint, controls maximum tier gate.
+    2. Tank Factory (`bld_tank_factory` / `bld_factory`): $4 \times 3$ footprint, armored vehicle production.
+    3. Airfield (`bld_airfield`): $5 \times 3$ footprint, runway and air support.
+    4. Arms Factory (`bld_arms_factory`): $4 \times 3$ footprint, weapons manufacturing.
+    5. Research Center (`bld_research_center`): $3 \times 3$ footprint, technology progression.
+    6. Resource Depot (`bld_resource_depot` / `bld_depot`): $3 \times 3$ footprint, resource storage protection.
+    7. Training Center (`bld_training_center` / `bld_barracks`): $3 \times 3$ footprint, infantry recruitment.
+    + Auxiliary Radar Station (`bld_radar_01`): $2 \times 2$ footprint, regional reconnaissance.
+  - Pure C# abstractions `IBuildingDataSource`, `IBaseStateRepository`, `IBaseRepository`, `IPlayerBaseService`.
+- **Untrusted Client Security & Formal Server Contract:**
   - Client state is explicitly non-authoritative simulation (`[NonAuthoritative]`).
-  - Timers calculate progression using UTC timestamps (`DateTime.UtcNow` vs `UpgradeEndTimeUtc`), not malleable per-frame delta time.
-  - Async service interface (`RequestUpgradeAsync`, `CancelUpgradeAsync`) ready for drop-in server RPC replacement in Phase 8.
+  - Upgrade timers calculate progression using UTC timestamps (`DateTime.UtcNow` vs `UpgradeEndTimeUtc`), not malleable frame time.
+  - Server contract specified in `docs/api/base-contract.md` covering `base.get`, `base.upgrade.request`, `base.upgrade.cancel`, `base.upgrade.sync` with UUIDv4 idempotency keys, server-authoritative timestamps, and structured error codes.
+  - Isolated `LocalMockBaseRepository` guarded with `#if UNITY_EDITOR || DEVELOPMENT_BUILD`.
 - **3D Base Presentation & UI:**
-  - `PlayerBaseView`: Spawns building 3D prefabs, handles pointer raycast selection with mouse and touch (`EnhancedTouchSupport` safety), UI click rejection, and camera focus synchronization.
+  - `PlayerBaseView`: Spawns all 8 buildings with dedicated procedural geometry and `BoxCollider`s, pointer raycast selection with mouse and touch (`EnhancedTouchSupport` safety), UI click rejection, and camera focus synchronization.
   - `BuildingView`: Selection ring, world-space level banner, and real-time upgrade countdown timer.
-  - `BuildingDetailDrawer`: Slide-in drawer showing structure intelligence, level, performance perks, upgrade costs vs current resources, HQ prerequisites, real-time timer countdown, Upgrade button, and Cancel button.
+  - `BuildingDetailDrawer`: Slide-in drawer showing structure intelligence, level, performance perks, upgrade costs vs current resources, HQ prerequisites, real-time timer countdown, Upgrade button, Cancel button, and visible "MOCK DATA (DEV ONLY)" badge when running mock repository.
 - **Bilingual Localization:**
-  - 100% string key parity in Arabic RTL and English for all building names, descriptions, and drawer UI controls.
+  - 100% string key parity in Arabic RTL and English for all building names, descriptions, perks, drawer UI controls, and mock data badge.
 - **Documentation:**
-  - Created `docs/base/BASE_BUILDING_SPEC.md` and `docs/base/ADDING_BUILDINGS.md`.
+  - Created `docs/base/BASE_BUILDING_SPEC.md`, `docs/base/ADDING_BUILDINGS.md`, and `docs/api/base-contract.md`.
 - **Automated Test Coverage:**
-  - **91 EditMode tests** (including 11 `BaseGridTests`, 9 `BuildingUpgradeTests`, and 3 `BuildingLocalizationTests`).
-  - **40 PlayMode tests** (including 9 `PlayerBaseInteractionTests` and updated `BootstrapFlowTests`).
-  - **131 total automated tests across all suites (100% pass rate, 0 failed, 0 errors).**
+  - **113 EditMode tests** (including `BaseGridTests`, `BuildingUpgradeTests` with DAG acyclic test, negative tests, and mock isolation, `BuildingLocalizationTests`).
+  - **50 PlayMode tests** (including `PlayerBaseInteractionTests` verifying all 7 MVP buildings + radar, mock badge, real-time Arabic update, and `ArmyInteractionTests`).
+  - **163 total automated tests across all suites (100% pass rate, 0 failed, 0 errors).**
 
 ### Phase 06 — Army & Military Units (Recruitment, Formations, Combat Stats)
 - **Unit Archetypes & Combat Domain:**

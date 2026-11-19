@@ -69,7 +69,8 @@ namespace KingWorldWar.Features.Base
 
             if (_gridView == null)
             {
-                _gridView = GetComponentInChildren<BaseGridView>() ?? gameObject.AddComponent<BaseGridView>();
+                _gridView = GetComponentInChildren<BaseGridView>();
+                if (_gridView == null) _gridView = gameObject.AddComponent<BaseGridView>();
             }
 
             if (_buildingsContainer == null)
@@ -128,13 +129,11 @@ namespace KingWorldWar.Features.Base
             }
             else
             {
-                instance = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                instance.transform.SetParent(_buildingsContainer, false);
-                instance.transform.position = worldPos;
-                instance.transform.localScale = new Vector3(def.FootprintWidth * 4f, 4f, def.FootprintHeight * 4f);
+                instance = CreateProceduralBuildingVisual(state.Type, def, worldPos);
             }
 
-            var view = instance.GetComponent<BuildingView>() ?? instance.AddComponent<BuildingView>();
+            var view = instance.GetComponent<BuildingView>();
+            if (view == null) view = instance.AddComponent<BuildingView>();
             view.Initialize(state, def, _loc);
             _views[state.Id] = view;
         }
@@ -144,11 +143,109 @@ namespace KingWorldWar.Features.Base
             switch (type)
             {
                 case BuildingType.CommandCenter: return _hqPrefab;
-                case BuildingType.Barracks: return _barracksPrefab;
-                case BuildingType.SupplyDepot: return _depotPrefab;
+                case BuildingType.TrainingCenter: return _barracksPrefab;
+                case BuildingType.ResourceDepot: return _depotPrefab;
                 case BuildingType.RadarStation: return _radarPrefab;
-                case BuildingType.VehicleFactory: return _factoryPrefab;
+                case BuildingType.TankFactory: return _factoryPrefab;
                 default: return null;
+            }
+        }
+
+        private GameObject CreateProceduralBuildingVisual(BuildingType type, BuildingDefinition def, Vector3 worldPos)
+        {
+            var root = new GameObject($"Bld_{type}_{worldPos.x:F0}_{worldPos.z:F0}");
+            root.transform.SetParent(_buildingsContainer, false);
+            root.transform.position = worldPos;
+
+            float w = def.FootprintWidth * 4f;
+            float h = def.FootprintHeight * 4f;
+
+            var basePlat = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            basePlat.transform.SetParent(root.transform, false);
+            basePlat.transform.localPosition = new Vector3(0, 0.4f, 0);
+            basePlat.transform.localScale = new Vector3(w - 0.5f, 0.8f, h - 0.5f);
+
+            var mat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+            mat.color = GetColorForType(type);
+            basePlat.GetComponent<Renderer>().material = mat;
+
+            if (type == BuildingType.Airfield)
+            {
+                var runway = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                runway.transform.SetParent(root.transform, false);
+                runway.transform.localPosition = new Vector3(0, 0.85f, 0);
+                runway.transform.localScale = new Vector3(w - 1f, 0.1f, 3.5f);
+                var runwayMat = new Material(mat) { color = new Color(0.25f, 0.28f, 0.3f) };
+                runway.GetComponent<Renderer>().material = runwayMat;
+
+                var tower = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                tower.transform.SetParent(root.transform, false);
+                tower.transform.localPosition = new Vector3(w * 0.3f, 3.0f, h * 0.3f);
+                tower.transform.localScale = new Vector3(2.5f, 3.0f, 2.5f);
+                var towerMat = new Material(mat) { color = new Color(0.6f, 0.65f, 0.7f) };
+                tower.GetComponent<Renderer>().material = towerMat;
+            }
+            else if (type == BuildingType.ArmsFactory)
+            {
+                var hall = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                hall.transform.SetParent(root.transform, false);
+                hall.transform.localPosition = new Vector3(0, 2.0f, 0);
+                hall.transform.localScale = new Vector3(w * 0.7f, 3.2f, h * 0.7f);
+                var hallMat = new Material(mat) { color = new Color(0.35f, 0.38f, 0.42f) };
+                hall.GetComponent<Renderer>().material = hallMat;
+
+                var stack1 = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                stack1.transform.SetParent(root.transform, false);
+                stack1.transform.localPosition = new Vector3(-w * 0.25f, 4.5f, h * 0.25f);
+                stack1.transform.localScale = new Vector3(1.2f, 2.5f, 1.2f);
+
+                var stack2 = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                stack2.transform.SetParent(root.transform, false);
+                stack2.transform.localPosition = new Vector3(-w * 0.25f, 4.5f, -h * 0.25f);
+                stack2.transform.localScale = new Vector3(1.2f, 2.5f, 1.2f);
+            }
+            else if (type == BuildingType.ResearchCenter)
+            {
+                var lab = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                lab.transform.SetParent(root.transform, false);
+                lab.transform.localPosition = new Vector3(0, 1.5f, 0);
+                lab.transform.localScale = new Vector3(w * 0.75f, 2.2f, h * 0.75f);
+
+                var dome = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                dome.transform.SetParent(root.transform, false);
+                dome.transform.localPosition = new Vector3(0, 3.0f, 0);
+                dome.transform.localScale = new Vector3(3.5f, 3.5f, 3.5f);
+                var domeMat = new Material(mat) { color = new Color(0.2f, 0.55f, 0.75f) };
+                dome.GetComponent<Renderer>().material = domeMat;
+            }
+            else
+            {
+                var block = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                block.transform.SetParent(root.transform, false);
+                block.transform.localPosition = new Vector3(0, 2f, 0);
+                block.transform.localScale = new Vector3(w * 0.8f, 3.5f, h * 0.8f);
+            }
+
+            var col = root.GetComponent<BoxCollider>();
+            if (col == null) col = root.AddComponent<BoxCollider>();
+            col.center = new Vector3(0, 2f, 0);
+            col.size = new Vector3(w, 4f, h);
+
+            return root;
+        }
+
+        private Color GetColorForType(BuildingType type)
+        {
+            switch (type)
+            {
+                case BuildingType.CommandCenter: return new Color(0.25f, 0.35f, 0.25f);
+                case BuildingType.Airfield: return new Color(0.3f, 0.35f, 0.4f);
+                case BuildingType.ArmsFactory: return new Color(0.45f, 0.3f, 0.25f);
+                case BuildingType.ResearchCenter: return new Color(0.2f, 0.4f, 0.55f);
+                case BuildingType.ResourceDepot: return new Color(0.55f, 0.45f, 0.2f);
+                case BuildingType.TrainingCenter: return new Color(0.35f, 0.45f, 0.35f);
+                case BuildingType.TankFactory: return new Color(0.4f, 0.4f, 0.45f);
+                default: return new Color(0.4f, 0.4f, 0.4f);
             }
         }
 

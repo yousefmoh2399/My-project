@@ -88,11 +88,16 @@ namespace KingWorldWar.Tests.PlayMode
             pbGo.transform.SetParent(upgRoot.transform);
             var pbImg = pbGo.AddComponent<Image>();
 
+            var mockBadgeGo = new GameObject("MockBadge");
+            mockBadgeGo.transform.SetParent(panelRoot.transform);
+            var mockBadgeTxt = CreateTmp("MockBadgeTxt", mockBadgeGo.transform);
+
             _drawer.SetupComponentsForTest(
                 panelRoot, bName, lBadge, bDesc, cPerk, nPerk,
                 reqRoot, cGold, cOil, cIron, cDuration, reqHq,
                 btnUpgrade, btnUpgradeTxt, btnCancel, btnClose,
-                upgRoot, cdTmp, pbImg
+                upgRoot, cdTmp, pbImg,
+                mockBadgeGo, mockBadgeTxt
             );
 
             // Data & Services
@@ -121,15 +126,17 @@ namespace KingWorldWar.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator PlayerBaseView_SpawnsAllFiveBuildings()
+        public IEnumerator PlayerBaseView_SpawnsAllSevenMvpBuildings()
         {
-            Assert.AreEqual(5, _baseView.BuildingViews.Count, "Must spawn all 5 initial base buildings.");
+            Assert.That(_baseView.BuildingViews.Count, Is.GreaterThanOrEqualTo(7), "Must spawn all 7 initial MVP base buildings.");
 
             Assert.IsTrue(_baseView.BuildingViews.ContainsKey(new BuildingId("bld_hq")));
             Assert.IsTrue(_baseView.BuildingViews.ContainsKey(new BuildingId("bld_barracks_01")));
             Assert.IsTrue(_baseView.BuildingViews.ContainsKey(new BuildingId("bld_depot_01")));
-            Assert.IsTrue(_baseView.BuildingViews.ContainsKey(new BuildingId("bld_radar_01")));
             Assert.IsTrue(_baseView.BuildingViews.ContainsKey(new BuildingId("bld_factory_01")));
+            Assert.IsTrue(_baseView.BuildingViews.ContainsKey(new BuildingId("bld_airfield_01")));
+            Assert.IsTrue(_baseView.BuildingViews.ContainsKey(new BuildingId("bld_arms_factory_01")));
+            Assert.IsTrue(_baseView.BuildingViews.ContainsKey(new BuildingId("bld_research_center_01")));
 
             yield return null;
         }
@@ -207,6 +214,8 @@ namespace KingWorldWar.Tests.PlayMode
             Assert.AreEqual("500", _drawer.CostGoldText.text);
             Assert.AreEqual("200", _drawer.CostOilText.text);
             Assert.AreEqual("100", _drawer.CostIronText.text);
+            Assert.IsTrue(_drawer.MockDataBadgeRoot.activeSelf, "MOCK DATA badge must be active in editor/dev build");
+            Assert.AreEqual("MOCK DATA (DEV ONLY)", _drawer.MockDataBadgeText.text);
         }
 
         [UnityTest]
@@ -257,7 +266,7 @@ namespace KingWorldWar.Tests.PlayMode
             _locService.SetLanguage(Language.Arabic, persist: false);
             yield return null;
 
-            Assert.AreEqual(ArabicTextShaper.Shape("مقر القيادة"), _drawer.BuildingNameText.text);
+            Assert.AreEqual(ArabicTextShaper.Shape("مقر القيادة العامة"), _drawer.BuildingNameText.text);
             Assert.IsTrue(ArabicTextShaper.ContainsArabic(_drawer.BuildingNameText.text));
         }
 

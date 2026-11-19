@@ -21,6 +21,8 @@ namespace KingWorldWar.UI.Base
         [SerializeField] private TextMeshProUGUI _buildingNameText;
         [SerializeField] private TextMeshProUGUI _levelBadgeText;
         [SerializeField] private TextMeshProUGUI _descriptionText;
+        [SerializeField] private GameObject _mockDataBadgeRoot;
+        [SerializeField] private TextMeshProUGUI _mockDataBadgeText;
 
         [Header("Performance Stats")]
         [SerializeField] private TextMeshProUGUI _currentPerkText;
@@ -56,6 +58,8 @@ namespace KingWorldWar.UI.Base
         public TextMeshProUGUI BuildingNameText => _buildingNameText;
         public TextMeshProUGUI LevelBadgeText => _levelBadgeText;
         public TextMeshProUGUI DescriptionText => _descriptionText;
+        public GameObject MockDataBadgeRoot => _mockDataBadgeRoot;
+        public TextMeshProUGUI MockDataBadgeText => _mockDataBadgeText;
         public TextMeshProUGUI CurrentPerkText => _currentPerkText;
         public TextMeshProUGUI NextPerkText => _nextPerkText;
         public TextMeshProUGUI CostGoldText => _costGoldText;
@@ -88,12 +92,16 @@ namespace KingWorldWar.UI.Base
             Button btnClose,
             GameObject upgradingStatusRoot,
             TextMeshProUGUI countdownText,
-            Image progressBarFill)
+            Image progressBarFill,
+            GameObject mockDataBadgeRoot = null,
+            TextMeshProUGUI mockDataBadgeText = null)
         {
             _panelRoot = panelRoot;
             _buildingNameText = buildingNameText;
             _levelBadgeText = levelBadgeText;
             _descriptionText = descriptionText;
+            _mockDataBadgeRoot = mockDataBadgeRoot;
+            _mockDataBadgeText = mockDataBadgeText;
             _currentPerkText = currentPerkText;
             _nextPerkText = nextPerkText;
             _upgradeRequirementsRoot = upgradeRequirementsRoot;
@@ -260,6 +268,20 @@ namespace KingWorldWar.UI.Base
             if (_buildingNameText != null) _buildingNameText.text = nameText;
             if (_levelBadgeText != null) _levelBadgeText.text = levelText;
             if (_descriptionText != null) _descriptionText.text = descText;
+
+            // Mock Data Badge (Editor / Development Build Only)
+            if (_mockDataBadgeRoot != null)
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                _mockDataBadgeRoot.SetActive(true);
+                if (_mockDataBadgeText != null)
+                {
+                    _mockDataBadgeText.text = _loc != null ? _loc.GetString("base.drawer.mock_badge") : "MOCK DATA (DEV ONLY)";
+                }
+#else
+                _mockDataBadgeRoot.SetActive(false);
+#endif
+            }
 
             // 2. Stats
             if (def.TryGetLevelData(building.CurrentLevel, out var currentData))

@@ -277,7 +277,8 @@ namespace KingWorldWar.Features.Army
                 }
 
                 instance.transform.localPosition = localPos;
-                var view = instance.GetComponent<ArmyUnitView>() ?? instance.AddComponent<ArmyUnitView>();
+                var view = instance.GetComponent<ArmyUnitView>();
+                if (view == null) view = instance.AddComponent<ArmyUnitView>();
                 view.Initialize(def, roster.GetCount(unitType), _loc);
 
                 // Check active queue

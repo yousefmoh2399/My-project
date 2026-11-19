@@ -80,6 +80,7 @@ namespace KingWorldWar.Tests.EditMode
                 "base.drawer.time_remaining",
                 "base.drawer.current_perk",
                 "base.drawer.next_perk",
+                "base.drawer.mock_badge",
                 "base.cancel_dialog.title",
                 "base.cancel_dialog.msg"
             };

@@ -2,33 +2,57 @@ namespace KingWorldWar.Core.Base
 {
     /// <summary>
     /// Supported military building archetypes in the player's base.
+    /// Strictly aligns with MVP Buildings (7) specified in Work Order:
+    /// 1. Command Center  2. Tank Factory  3. Airfield  4. Arms Factory
+    /// 5. Research Center 6. Resource Depot 7. Training Center
     /// </summary>
     public enum BuildingType
     {
         /// <summary>
-        /// Command Center / Headquarters (HQ) - Core progression anchor.
-        /// Determines the maximum allowable upgrade level of all other buildings.
+        /// 1. Command Center / Headquarters (HQ) - Core progression anchor.
+        /// Gates the maximum allowable tier of all other structures.
         /// </summary>
         CommandCenter = 1,
 
         /// <summary>
-        /// Military Barracks - Infantry training, garrison capacity, and base defense.
+        /// 2. Tank Factory - Heavy armor manufacturing and tank maintenance.
+        /// (Alias: VehicleFactory).
         /// </summary>
-        Barracks = 2,
+        TankFactory = 2,
+        VehicleFactory = 2,
 
         /// <summary>
-        /// Supply Depot - Increases maximum capacity for Gold, Oil, and Iron storage.
+        /// 3. Airfield - Tactical airbase, fighter squadrons, and airspace interception.
         /// </summary>
-        SupplyDepot = 3,
+        Airfield = 3,
 
         /// <summary>
-        /// Radar Station - Strategic reconnaissance, enemy scouting, and early warning intelligence.
+        /// 4. Arms Factory - Munitions production, heavy weaponry, and explosive ordnance.
         /// </summary>
-        RadarStation = 4,
+        ArmsFactory = 4,
 
         /// <summary>
-        /// Vehicle Factory - Assembly, repair, and staging of armored fighting vehicles and tanks.
+        /// 5. Research Center - Military science, technological breakthroughs, and tactical doctrines.
         /// </summary>
-        VehicleFactory = 5
+        ResearchCenter = 5,
+
+        /// <summary>
+        /// 6. Resource Depot - Strategic stockpiles and secured vaults for Gold, Oil, and Iron.
+        /// (Alias: SupplyDepot).
+        /// </summary>
+        ResourceDepot = 6,
+        SupplyDepot = 6,
+
+        /// <summary>
+        /// 7. Training Center - Ground forces boot camp and tactical squad training.
+        /// (Alias: Barracks).
+        /// </summary>
+        TrainingCenter = 7,
+        Barracks = 7,
+
+        /// <summary>
+        /// Auxiliary / Legacy: Radar Station - Early warning scanning array.
+        /// </summary>
+        RadarStation = 8
     }
 }
