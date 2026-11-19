@@ -127,7 +127,7 @@ namespace KingWorldWar.Features.Army
                 return;
             }
 
-            if (Touch.activeTouches.Count > 0)
+            if (EnhancedTouchSupport.enabled && Touch.activeTouches.Count > 0)
             {
                 var touches = Touch.activeTouches;
                 if (touches.Count == 1)

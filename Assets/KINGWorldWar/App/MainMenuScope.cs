@@ -1,3 +1,4 @@
+using KingWorldWar.Core.Alliance;
 using KingWorldWar.Core.Army;
 using KingWorldWar.Core.Base;
 using KingWorldWar.Core.Economy;
@@ -9,12 +10,14 @@ using KingWorldWar.Features.Army;
 using KingWorldWar.Features.Base;
 using KingWorldWar.Features.Camera;
 using KingWorldWar.Features.WorldMap;
+using KingWorldWar.Infrastructure.Alliance;
 using KingWorldWar.Infrastructure.Army;
 using KingWorldWar.Infrastructure.Base;
 using KingWorldWar.Infrastructure.Economy;
 using KingWorldWar.Infrastructure.Localization;
 using KingWorldWar.Infrastructure.UI;
 using KingWorldWar.Infrastructure.WorldMap;
+using KingWorldWar.UI.Alliance;
 using KingWorldWar.UI.Army;
 using KingWorldWar.UI.Base;
 using KingWorldWar.UI.Common;
@@ -53,6 +56,10 @@ namespace KingWorldWar.App
 
         [Header("Economy & Resources")]
         [SerializeField] private EconomyDetailDrawer _economyDetailDrawer;
+
+        [Header("Alliance (Phase 7)")]
+        [SerializeField] private AllianceScreenView _allianceScreenView;
+        [SerializeField] private AllianceDetailDrawer _allianceDetailDrawer;
 
         public MainMenuShellView ShellView
         {
@@ -126,6 +133,18 @@ namespace KingWorldWar.App
             set => _economyDetailDrawer = value;
         }
 
+        public AllianceScreenView AllianceScreenView
+        {
+            get => _allianceScreenView;
+            set => _allianceScreenView = value;
+        }
+
+        public AllianceDetailDrawer AllianceDetailDrawer
+        {
+            get => _allianceDetailDrawer;
+            set => _allianceDetailDrawer = value;
+        }
+
         public IScreenNavigationService NavigationService { get; private set; }
         public ILocalizationService LocalizationService { get; private set; }
         public IModalService ModalService { get; private set; }
@@ -133,6 +152,7 @@ namespace KingWorldWar.App
         public IPlayerBaseService PlayerBaseService { get; private set; }
         public IArmyService ArmyService { get; private set; }
         public IEconomyService EconomyService { get; private set; }
+        public IAllianceService AllianceService { get; private set; }
 
         private void Start()
         {
@@ -208,6 +228,14 @@ namespace KingWorldWar.App
                 container.Register<IResourceState>(ecoImpl);
             }
 
+            if (!container.TryResolve<IAllianceService>(out var allianceService))
+            {
+                var allianceRepo = new LocalMockAllianceRepository();
+                allianceService = new AllianceService(allianceRepo, economyService, log);
+                container.Register<IAllianceRepository>(allianceRepo);
+                container.Register<IAllianceService>(allianceService);
+            }
+
             NavigationService = nav;
             LocalizationService = loc;
             ModalService = modal;
@@ -215,6 +243,7 @@ namespace KingWorldWar.App
             PlayerBaseService = baseService;
             ArmyService = armyService;
             EconomyService = economyService;
+            AllianceService = allianceService;
 
             if (!container.TryResolve<ILocalizationService>(out _))
                 container.Register<ILocalizationService>(loc);
@@ -292,6 +321,17 @@ namespace KingWorldWar.App
                 _armyScreenView.Initialize(armyService, loc, _recruitmentDrawer);
             }
 
+            if (_allianceDetailDrawer != null)
+            {
+                _allianceDetailDrawer.Bind(loc);
+            }
+
+            if (_allianceScreenView != null)
+            {
+                _allianceScreenView.Initialize(allianceService, loc, modal, _allianceDetailDrawer);
+                nav.RegisterScreen(ScreenId.Alliance, _allianceScreenView);
+            }
+
             // Setup Screen switching
             nav.OnScreenChanged += HandleScreenChanged;
             HandleScreenChanged(nav.CurrentScreen);
@@ -343,6 +383,17 @@ namespace KingWorldWar.App
                     _cameraRig.SetFocusPosition(_playerArmyView.InspectionCenter);
                 }
             }
+            else if (screenId == ScreenId.Alliance)
+            {
+                if (_worldMapView != null) _worldMapView.gameObject.SetActive(false);
+                if (_playerBaseView != null) _playerBaseView.gameObject.SetActive(false);
+                if (_playerArmyView != null) _playerArmyView.gameObject.SetActive(false);
+                if (_territoryDetailDrawer != null) _territoryDetailDrawer.Hide();
+                if (_buildingDetailDrawer != null) _buildingDetailDrawer.Hide();
+                if (_recruitmentDrawer != null) _recruitmentDrawer.Close();
+                if (_economyDetailDrawer != null) _economyDetailDrawer.Close();
+                if (_allianceScreenView != null) _allianceScreenView.Refresh();
+            }
             else
             {
                 if (_worldMapView != null) _worldMapView.gameObject.SetActive(false);
@@ -351,6 +402,8 @@ namespace KingWorldWar.App
                 if (_territoryDetailDrawer != null) _territoryDetailDrawer.Hide();
                 if (_buildingDetailDrawer != null) _buildingDetailDrawer.Hide();
                 if (_recruitmentDrawer != null) _recruitmentDrawer.Close();
+                if (_economyDetailDrawer != null) _economyDetailDrawer.Close();
+                if (_allianceDetailDrawer != null) _allianceDetailDrawer.Close();
             }
         }
 

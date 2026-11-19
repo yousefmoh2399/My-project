@@ -1,7 +1,7 @@
 # PROJECT STATE — KING WORLD WAR
 
-**Last Updated:** Phase 06 (Resources & Economy: Server-Authoritative Design)  
-**Active Branch:** `phase-06/economy`  
+**Last Updated:** Phase 07 (Alliances & Coalition Systems: Server-Authoritative Design)  
+**Active Branch:** `phase-07/alliances`  
 **Engine:** Unity 6 (`6000.6.9f1`)  
 **Active Render Pipeline:** Universal Render Pipeline (URP 17.6.0)
 
@@ -194,6 +194,49 @@
 - **ADR-0004 (World Map Topology & Untrusted Client):** All 25 territories and 5 regions are declared via pure C# domain contracts and immutable ScriptableObject configs. The graph topology enforces 100% bidirectional symmetry and single-component connectivity. All territory runtime values (yields, defense, ownership) are strictly non-authoritative client displays with explicit warnings until server-synchronized in Phase 8/9. Colorblind accessibility symbols (`★`, `◆`, `✖`, `▲`) accompany faction colors.
 - **ADR-0005 (Player Base Grid & Upgrade Architecture):** Tactical base operations use a $20 \times 20$ discrete grid with rectangular footprint occupancy. Upgrades enforce Command Center prerequisite tier gating. Client upgrade countdowns rely on UTC timestamps and asynchronous contracts (`Task<Result<...>>`) to cleanly bridge from local in-memory simulation to authoritative Nakama RPCs in Phase 8.
 - **ADR-0006 (Army Units & Recruitment Architecture):** Military units use pure C# domain definitions and auto-calculating combat power ratings. Recruitment queues are capped at 2 concurrent operations and rely on UTC timestamps for tamper-resistant client progression. Unit recruitment and standing rosters are explicitly modeled as client-side simulations; authoritative inventory and training verification will be processed via Nakama PostgreSQL transactions in Phase 8/9.
+- **ADR-0007 (Alliance Hierarchy, Untrusted Client & Server Contract Architecture):** Alliances enforce a strict server-authoritative role hierarchy (`Leader` > `Officer` > `Veteran` > `Member` > `Recruit`). The client possesses zero write authority: all role updates, applications, kicks, and notice board edits pass through Nakama RPCs and atomic PostgreSQL transactions. Alliance establishment requires 10,000 Gold, tag validation (3-4 alphanumeric), and maximum member cap of 50. All mutating requests enforce UUIDv4 idempotency.
+
+---
+
+### Phase 07 — Alliances & Coalition Systems (Server-Authoritative Design)
+- **Role Hierarchy & Permission Model (`KingWorldWar.Core.Alliance`):**
+  - Roles: `Leader = 1`, `Officer = 2`, `Veteran = 3`, `Member = 4`, `Recruit = 5`.
+  - Strict hierarchical permission matrix:
+    - Kicking: actor must strictly outrank target (`actorRole > targetRole`); self-kick prohibited via kick command.
+    - Role changes: only Leader can promote/demote Officers; Officers can only manage Member/Recruit up to Veteran.
+    - Notice & Policy editing: Leader and Officer only.
+    - Disband & Leadership transfer: Leader only.
+- **Immutable Domain Models:**
+  - `AllianceId`: Immutable case-insensitive struct.
+  - `AllianceRole`: Enum with permission extension methods (`CanInvite`, `CanManageApplications`, `CanEditNotice`, `CanDisband`, `CanTransferLeadership`, `CanKick`, `CanPromote`, `CanDemote`).
+  - `AllianceJoinPolicy`: Enum (`Open = 1`, `ApplyOnly = 2`, `Closed = 3`).
+  - `AllianceProfile`: Immutable record with `ValidateCreationParameters` (name 3-24 chars, tag 3-4 alphanumeric, notice <= 256 chars), status properties (`IsFull`, `CanDirectJoin`, `CanApply`).
+  - `AllianceMember`: Immutable member record with combat power and contribution score.
+  - `AllianceApplication`: Immutable pending application record.
+- **Development Mock Repository (`LocalMockAllianceRepository`):**
+  - Guarded behind `#if UNITY_EDITOR || DEBUG || UNITY_INCLUDE_TESTS`.
+  - Seeded with 3 realistic coalitions: `[KWW] King Vanguard` (Open, 28/50), `[IRON] Iron Legion` (ApplyOnly, 42/50), and `[DES] Desert Falcons` (Open, 15/50).
+  - Simulates server permissions, application queues, member lists, capacity limits (50 cap), and UUIDv4 idempotency caching.
+- **Client Service (`AllianceService`):**
+  - Manages reactive state updates and events (`OnAllianceUpdated`, `OnMembersUpdated`, `OnApplicationsUpdated`, `OnLeftAlliance`).
+  - Coordinates creation spend (10,000 Gold) with `IEconomyService`.
+- **Server Contract Specification (`docs/api/alliance-contract.md`):**
+  - Complete Nakama server runtime and PostgreSQL contract specification.
+  - RPC endpoints: `kww.alliance.get`, `kww.alliance.search`, `kww.alliance.get_members`, `kww.alliance.get_applications`, `kww.alliance.create`, `kww.alliance.join`, `kww.alliance.apply`, `kww.alliance.application.decide`, `kww.alliance.kick`, `kww.alliance.role.set`, `kww.alliance.leave`, `kww.alliance.notice.update`.
+  - PostgreSQL schema for `alliances`, `alliance_members`, `alliance_applications`, `idempotency_records`.
+  - Anti-cheat, rate limiting, and structured error codes mapping.
+- **Dual-State UI Presentation:**
+  - `AllianceScreenView`: Implements `IScreen` for `ScreenId.Alliance`.
+    - State A (No Alliance): directory search, join policy filtering, and alliance creation panel (10,000 Gold).
+    - State B (In Alliance): coalition header banner, Total Combat Power, Member Count / Max, Notice Board tab with live edit capability for Officers/Leaders, Member Roster tab with permission-aware Kick/Promote/Demote buttons, and Applications Queue tab with Accept/Reject triage.
+  - `AllianceDetailDrawer`: Slide-in inspection panel displaying alliance dossier, stats, and Join/Apply action button.
+  - `AllianceMemberRowView`: Dynamic member row with role evaluation.
+- **Bilingual Military Localization:**
+  - 100% key parity in Arabic RTL and English for all 34 alliance keys in `DefaultStringTables.cs`.
+- **Automated Test Coverage:**
+  - **166 EditMode tests** (including 6 new `AllianceDomainTests`, 14 new `AllianceRepositoryTests`, and 2 new `AllianceLocalizationTests`).
+  - **58 PlayMode tests** (including 4 new `AllianceUITests`).
+  - **224 total automated tests across all suites (100% pass rate, 0 failed, 0 errors).**
 
 ---
 
@@ -209,6 +252,25 @@
 ---
 
 ## 4. HOW TO RUN
+
+### Running the Alliance Screen & Coalition Operations in Main Menu
+1. Open `Assets/KINGWorldWar/Scenes/MainMenu.unity`.
+2. Enter Play Mode.
+3. In the bottom navigation bar, tap the **Alliance** tab (`ScreenId.Alliance`).
+4. **State A (No Alliance):**
+   - Observe the Coalition Command directory displaying seeded coalitions: `[KWW] King Vanguard`, `[IRON] Iron Legion`, `[DES] Desert Falcons`.
+   - Use the search bar to filter by name or tag.
+   - Click on any alliance row to slide open the `AllianceDetailDrawer`, inspecting combat power, member capacity, notice board, and Join/Apply button.
+   - Click **Create Alliance** to expand the establishment form (requires 10,000 Gold, 3-4 char tag).
+5. **State B (In Alliance):**
+   - Join `[KWW] King Vanguard` (Open policy) or found an alliance.
+   - Observe the top header banner displaying: Alliance Name, `[TAG]`, Total Combat Power, and Member count ($29/50$).
+   - Switch between tabs:
+     * **Members Tab:** View all member ranks (Leader, Officer, Veteran, Member, Recruit). Authorized ranks see dynamic Kick, Promote, and Demote action buttons.
+     * **Notice Board Tab:** View public bulletin. Officers and Leaders can click "Edit Notice", update text, and save in real-time.
+     * **Applications Tab:** Visible to Officers and Leaders. Review pending applications with one-click Accept or Reject buttons.
+   - Click **Leave Alliance** to exit with confirmation dialog.
+6. Tap the "عربي" / "EN" button in the top navigation bar to observe instant real-time bilingual switching and Arabic RTL shaping across all alliance views and drawers.
 
 ### Running the Army Screen & Military Units in Main Menu
 1. Open `Assets/KINGWorldWar/Scenes/MainMenu.unity`.

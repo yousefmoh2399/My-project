@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using KingWorldWar.Core.Alliance;
 using KingWorldWar.Core.Army;
 using KingWorldWar.Core.Base;
 using KingWorldWar.Core.Common;
@@ -11,6 +12,7 @@ using KingWorldWar.Core.Quality;
 using KingWorldWar.Core.Scenes;
 using KingWorldWar.Core.UI;
 using KingWorldWar.Core.WorldMap;
+using KingWorldWar.Infrastructure.Alliance;
 using KingWorldWar.Infrastructure.Army;
 using KingWorldWar.Infrastructure.Base;
 using KingWorldWar.Infrastructure.Config;
@@ -179,6 +181,12 @@ namespace KingWorldWar.App
             container.Register<IEconomyRepository>(economyRepo);
             container.Register<IEconomyService>(economyService);
             container.Register<IResourceState>(economyService);
+
+            var allianceRepo = new LocalMockAllianceRepository();
+            var allianceService = new AllianceService(allianceRepo, economyService, log);
+
+            container.Register<IAllianceRepository>(allianceRepo);
+            container.Register<IAllianceService>(allianceService);
 
             container.Register<IAuthService>(new NullAuthService());
             container.Register<IPlayerRepository>(new NullPlayerRepository());

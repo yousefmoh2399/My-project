@@ -84,6 +84,33 @@ namespace KingWorldWar.Core.Common
         public static GameError RateLimited(string details) =>
             new GameError("RATE_LIMITED", "Operation rate limit exceeded. Please wait before retrying.", details);
 
+        public static GameError AllianceNotFound(string id) =>
+            new GameError("ALLIANCE_NOT_FOUND", $"Alliance with ID '{id}' was not found.", id);
+
+        public static GameError AllianceFull(string id) =>
+            new GameError("ALLIANCE_FULL", $"Alliance '{id}' has reached maximum member capacity.", id);
+
+        public static GameError AlreadyInAlliance() =>
+            new GameError("ALREADY_IN_ALLIANCE", "Player is already a member of an alliance.", string.Empty);
+
+        public static GameError NotInAlliance() =>
+            new GameError("NOT_IN_ALLIANCE", "Player is not a member of any alliance.", string.Empty);
+
+        public static GameError InsufficientPermissions(string reason) =>
+            new GameError("INSUFFICIENT_PERMISSIONS", "Actor does not have sufficient alliance permissions for this operation.", reason);
+
+        public static GameError CannotKickHigherOrEqualRole() =>
+            new GameError("CANNOT_KICK_HIGHER_ROLE", "Cannot kick a member with equal or higher rank in the alliance hierarchy.", string.Empty);
+
+        public static GameError ApplicationNotFound(string appId) =>
+            new GameError("APPLICATION_NOT_FOUND", $"Alliance application with ID '{appId}' was not found.", appId);
+
+        public static GameError AllianceTagTaken(string tag) =>
+            new GameError("ALLIANCE_TAG_TAKEN", $"Alliance tag '[{tag}]' is already in use by another alliance.", tag);
+
+        public static GameError AllianceNameTaken(string name) =>
+            new GameError("ALLIANCE_NAME_TAKEN", $"Alliance name '{name}' is already in use by another alliance.", name);
+
         public bool Equals(GameError other) =>
             string.Equals(Code, other.Code, StringComparison.Ordinal) &&
             string.Equals(Message, other.Message, StringComparison.Ordinal);
