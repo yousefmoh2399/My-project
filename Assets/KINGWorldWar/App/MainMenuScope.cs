@@ -1,15 +1,19 @@
+using KingWorldWar.Core.Army;
 using KingWorldWar.Core.Base;
 using KingWorldWar.Core.Localization;
 using KingWorldWar.Core.Logging;
 using KingWorldWar.Core.UI;
 using KingWorldWar.Core.WorldMap;
+using KingWorldWar.Features.Army;
 using KingWorldWar.Features.Base;
 using KingWorldWar.Features.Camera;
 using KingWorldWar.Features.WorldMap;
+using KingWorldWar.Infrastructure.Army;
 using KingWorldWar.Infrastructure.Base;
 using KingWorldWar.Infrastructure.Localization;
 using KingWorldWar.Infrastructure.UI;
 using KingWorldWar.Infrastructure.WorldMap;
+using KingWorldWar.UI.Army;
 using KingWorldWar.UI.Base;
 using KingWorldWar.UI.Common;
 using KingWorldWar.UI.Modals;
@@ -38,6 +42,11 @@ namespace KingWorldWar.App
         [Header("Player Base")]
         [SerializeField] private PlayerBaseView _playerBaseView;
         [SerializeField] private BuildingDetailDrawer _buildingDetailDrawer;
+
+        [Header("Army & Military")]
+        [SerializeField] private PlayerArmyView _playerArmyView;
+        [SerializeField] private ArmyScreenView _armyScreenView;
+        [SerializeField] private RecruitmentDrawer _recruitmentDrawer;
 
         public MainMenuShellView ShellView
         {
@@ -81,6 +90,24 @@ namespace KingWorldWar.App
             set => _buildingDetailDrawer = value;
         }
 
+        public PlayerArmyView PlayerArmyView
+        {
+            get => _playerArmyView;
+            set => _playerArmyView = value;
+        }
+
+        public ArmyScreenView ArmyScreenView
+        {
+            get => _armyScreenView;
+            set => _armyScreenView = value;
+        }
+
+        public RecruitmentDrawer RecruitmentDrawer
+        {
+            get => _recruitmentDrawer;
+            set => _recruitmentDrawer = value;
+        }
+
         public StrategyCameraRig CameraRig
         {
             get => _cameraRig;
@@ -92,6 +119,7 @@ namespace KingWorldWar.App
         public IModalService ModalService { get; private set; }
         public IWorldMapService WorldMapService { get; private set; }
         public IPlayerBaseService PlayerBaseService { get; private set; }
+        public IArmyService ArmyService { get; private set; }
 
         private void Start()
         {
@@ -131,11 +159,25 @@ namespace KingWorldWar.App
                 container.Register<IPlayerBaseService>(baseService);
             }
 
+            // Army & Units fallback if scene launched directly
+            if (!container.TryResolve<IArmyService>(out var armyService))
+            {
+                var armyConfig = ScriptableObject.CreateInstance<ArmyConfigSO>();
+                armyConfig.InitializeFromDefaults();
+                var armyRepo = new InMemoryArmyStateRepository();
+                var baseRepo = container.TryResolve<IBaseStateRepository>(out var br) ? br : null;
+                armyService = new ArmyService(armyConfig, armyRepo, baseRepo, log);
+                container.Register<IArmyDataSource>(armyConfig);
+                container.Register<IArmyStateRepository>(armyRepo);
+                container.Register<IArmyService>(armyService);
+            }
+
             NavigationService = nav;
             LocalizationService = loc;
             ModalService = modal;
             WorldMapService = mapService;
             PlayerBaseService = baseService;
+            ArmyService = armyService;
 
             if (!container.TryResolve<ILocalizationService>(out _))
                 container.Register<ILocalizationService>(loc);
@@ -180,6 +222,28 @@ namespace KingWorldWar.App
                 _buildingDetailDrawer.Bind(baseService, loc, modal);
             }
 
+            if (_playerArmyView != null)
+            {
+                _playerArmyView.Initialize(armyService, loc, _cameraRig);
+                _playerArmyView.OnUnitSelected += (unitView) =>
+                {
+                    if (_recruitmentDrawer != null)
+                    {
+                        _recruitmentDrawer.OpenForUnit(unitView.UnitType);
+                    }
+                };
+            }
+
+            if (_recruitmentDrawer != null)
+            {
+                _recruitmentDrawer.Initialize(armyService, loc, modal);
+            }
+
+            if (_armyScreenView != null)
+            {
+                _armyScreenView.Initialize(armyService, loc, _recruitmentDrawer);
+            }
+
             // Setup Screen switching
             nav.OnScreenChanged += HandleScreenChanged;
             HandleScreenChanged(nav.CurrentScreen);
@@ -198,7 +262,9 @@ namespace KingWorldWar.App
             {
                 if (_worldMapView != null) _worldMapView.gameObject.SetActive(true);
                 if (_playerBaseView != null) _playerBaseView.gameObject.SetActive(false);
+                if (_playerArmyView != null) _playerArmyView.gameObject.SetActive(false);
                 if (_buildingDetailDrawer != null) _buildingDetailDrawer.Hide();
+                if (_recruitmentDrawer != null) _recruitmentDrawer.Close();
                 if (_cameraRig != null)
                 {
                     _cameraRig.SetFocusPosition(new Vector3(50f, 0f, 40f));
@@ -208,11 +274,35 @@ namespace KingWorldWar.App
             {
                 if (_worldMapView != null) _worldMapView.gameObject.SetActive(false);
                 if (_playerBaseView != null) _playerBaseView.gameObject.SetActive(true);
+                if (_playerArmyView != null) _playerArmyView.gameObject.SetActive(false);
                 if (_territoryDetailDrawer != null) _territoryDetailDrawer.Hide();
+                if (_recruitmentDrawer != null) _recruitmentDrawer.Close();
                 if (_playerBaseView != null && _cameraRig != null)
                 {
                     _cameraRig.SetFocusPosition(_playerBaseView.GridView.BaseCenterWorldPosition);
                 }
+            }
+            else if (screenId == ScreenId.Army)
+            {
+                if (_worldMapView != null) _worldMapView.gameObject.SetActive(false);
+                if (_playerBaseView != null) _playerBaseView.gameObject.SetActive(false);
+                if (_playerArmyView != null) _playerArmyView.gameObject.SetActive(true);
+                if (_territoryDetailDrawer != null) _territoryDetailDrawer.Hide();
+                if (_buildingDetailDrawer != null) _buildingDetailDrawer.Hide();
+                if (_armyScreenView != null) _armyScreenView.Refresh();
+                if (_playerArmyView != null && _cameraRig != null)
+                {
+                    _cameraRig.SetFocusPosition(_playerArmyView.InspectionCenter);
+                }
+            }
+            else
+            {
+                if (_worldMapView != null) _worldMapView.gameObject.SetActive(false);
+                if (_playerBaseView != null) _playerBaseView.gameObject.SetActive(false);
+                if (_playerArmyView != null) _playerArmyView.gameObject.SetActive(false);
+                if (_territoryDetailDrawer != null) _territoryDetailDrawer.Hide();
+                if (_buildingDetailDrawer != null) _buildingDetailDrawer.Hide();
+                if (_recruitmentDrawer != null) _recruitmentDrawer.Close();
             }
         }
 

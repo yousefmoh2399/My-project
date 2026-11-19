@@ -57,6 +57,21 @@ namespace KingWorldWar.Core.Common
         public static GameError GridPlacementFailed(string details) =>
             new GameError("GRID_PLACEMENT_FAILED", "Building cannot be placed at the specified grid coordinates.", details);
 
+        public static GameError UnitNotFound(string id) =>
+            new GameError("UNIT_NOT_FOUND", $"Unit definition with ID '{id}' was not found.", id);
+
+        public static GameError UnitPrerequisiteNotMet(string details) =>
+            new GameError("UNIT_PREREQUISITE_NOT_MET", "Building prerequisite for unit recruitment is not satisfied.", details);
+
+        public static GameError RecruitmentQueueFull(string details) =>
+            new GameError("RECRUITMENT_QUEUE_FULL", "Maximum concurrent recruitment queues reached.", details);
+
+        public static GameError RecruitmentItemNotFound(string queueId) =>
+            new GameError("RECRUITMENT_ITEM_NOT_FOUND", $"Recruitment queue item '{queueId}' was not found.", queueId);
+
+        public static GameError InvalidRecruitCount(int count) =>
+            new GameError("INVALID_RECRUIT_COUNT", $"Recruitment quantity must be greater than zero (received {count}).", count.ToString());
+
         public bool Equals(GameError other) =>
             string.Equals(Code, other.Code, StringComparison.Ordinal) &&
             string.Equals(Message, other.Message, StringComparison.Ordinal);

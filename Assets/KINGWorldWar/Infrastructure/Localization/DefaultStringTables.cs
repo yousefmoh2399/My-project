@@ -180,7 +180,55 @@ namespace KingWorldWar.Infrastructure.Localization
             { "base.drawer.current_perk", "Current Performance" },
             { "base.drawer.next_perk", "Next Level Upgrade" },
             { "base.cancel_dialog.title", "Cancel Construction" },
-            { "base.cancel_dialog.msg", "Are you sure you want to abort the upgrade in progress?" }
+            { "base.cancel_dialog.msg", "Are you sure you want to abort the upgrade in progress?" },
+
+            // Army & Military Units (Phase 6)
+            { "unit.infantry.name", "Tactical Infantry" },
+            { "unit.infantry.desc", "Frontline combat squad armed with assault rifles and portable anti-armor weapons. Rapid deployment and high defense in urban terrain." },
+            { "unit.infantry.role", "Infantry / Garrison" },
+            { "unit.tank.name", "Main Battle Tank" },
+            { "unit.tank.desc", "Heavy armored combat vehicle featuring a high-velocity cannon and composite plating. Exceptional firepower and frontal armor." },
+            { "unit.tank.role", "Armored Strike" },
+            { "unit.artillery.name", "Heavy Artillery" },
+            { "unit.artillery.desc", "Long-range self-propelled howitzer delivering devastating saturation bombardment to suppress enemy fortifications." },
+            { "unit.artillery.role", "Long-Range Bombardment" },
+            { "unit.recon.name", "Armored Recon Vehicle" },
+            { "unit.recon.desc", "High-speed light scout vehicle equipped with tactical radar and rapid-fire autocannon. Excels in battlefield reconnaissance." },
+            { "unit.recon.role", "Recon & Flanking" },
+
+            // Unit Stats Labels
+            { "unit.stat.health", "Durability (HP)" },
+            { "unit.stat.attack", "Attack Power" },
+            { "unit.stat.defense", "Armor Defense" },
+            { "unit.stat.speed", "Speed" },
+            { "unit.stat.range", "Combat Range" },
+            { "unit.stat.power", "Combat Power" },
+
+            // Army Screen UI
+            { "army.screen.title", "Military Command" },
+            { "army.screen.total_power", "Total Combat Power" },
+            { "army.screen.total_troops", "Total Forces" },
+            { "army.screen.active_queues", "Training Operations" },
+            { "army.screen.roster_count", "Mobilized: {0}" },
+            { "army.screen.btn_recruit", "Recruit" },
+            { "army.screen.btn_inspect", "Inspect" },
+            { "army.screen.queue_empty", "No active training operations" },
+
+            // Recruitment Drawer UI
+            { "army.drawer.title", "Troop Mobilization" },
+            { "army.drawer.quantity", "Batch Quantity" },
+            { "army.drawer.total_cost", "Mobilization Cost" },
+            { "army.drawer.training_time", "Training Duration" },
+            { "army.drawer.req_building", "Requires {0} Level {1}" },
+            { "army.drawer.req_met", "Prerequisites Satisfied" },
+            { "army.drawer.req_not_met", "Building Prerequisite Not Met" },
+            { "army.drawer.action_recruit", "Commence Mobilization" },
+            { "army.drawer.action_cancel", "Cancel Mobilization" },
+            { "army.drawer.training_progress", "Training in progress..." },
+            { "army.drawer.time_remaining", "Time Remaining: {0}" },
+            { "army.drawer.queue_full", "Training Queue Maximum Capacity Reached" },
+            { "army.cancel_dialog.title", "Abort Mobilization" },
+            { "army.cancel_dialog.msg", "Are you sure you want to cancel troop recruitment? Resources will be refunded." }
         };
 
         public static readonly Dictionary<string, string> ArabicTable = new Dictionary<string, string>
@@ -349,7 +397,55 @@ namespace KingWorldWar.Infrastructure.Localization
             { "base.drawer.current_perk", "القدرات الحالية" },
             { "base.drawer.next_perk", "مزايا المستوى التالي" },
             { "base.cancel_dialog.title", "إلغاء أعمال الترقية" },
-            { "base.cancel_dialog.msg", "هل أنت متأكد من إلغاء عملية الترقية الجارية؟" }
+            { "base.cancel_dialog.msg", "هل أنت متأكد من إلغاء عملية الترقية الجارية؟" },
+
+            // Army & Military Units (Phase 6)
+            { "unit.infantry.name", "مشاة تكتيكية" },
+            { "unit.infantry.desc", "فصيلة قتالية مدربة مسلحة ببنادق هجومية وأسلحة مضادة للدروع. تمتاز بسرعة الانتشار والقدرة الدفاعية العالية." },
+            { "unit.infantry.role", "مشاة خط المواجهة" },
+            { "unit.tank.name", "دبابة قتال رئيسية" },
+            { "unit.tank.desc", "مركبة مدرعة ثقيلة مزودة بمدفع رئيسي عالي القدرة ودروع مركبة. تشكل رأس الحربة في الهجمات المدرعة." },
+            { "unit.tank.role", "اقتحام مدرع" },
+            { "unit.artillery.name", "مدفعية ثقيلة" },
+            { "unit.artillery.desc", "راجمات ومدافع ذاتية الحركة بعيدة المدى تدك تحصينات العدو بنيران تمهيدية مدمرة قبل تقدم القوات." },
+            { "unit.artillery.role", "قصف بعيد المدى" },
+            { "unit.recon.name", "مركبة استطلاع مدرعة" },
+            { "unit.recon.desc", "آلية خفيفة سريعة الحركة مزودة برادار استطلاعي ورشاش سريع، تتفوق في كشف مواقع العدو والمناورة السريعة." },
+            { "unit.recon.role", "استطلاع وتطويق" },
+
+            // Unit Stats Labels
+            { "unit.stat.health", "الصلابة (نقاط الحياة)" },
+            { "unit.stat.attack", "القوة الهجومية" },
+            { "unit.stat.defense", "الدروع الدفاعية" },
+            { "unit.stat.speed", "السرعة" },
+            { "unit.stat.range", "المدى القتالي" },
+            { "unit.stat.power", "القوة القتالية" },
+
+            // Army Screen UI
+            { "army.screen.title", "قيادة الجيش والقوات" },
+            { "army.screen.total_power", "إجمالي القوة القتالية" },
+            { "army.screen.total_troops", "إجمالي القوات الجاهزة" },
+            { "army.screen.active_queues", "عمليات التعبئة والتدريب" },
+            { "army.screen.roster_count", "القوات الجاهزة: {0}" },
+            { "army.screen.btn_recruit", "تعبئة وتدريب" },
+            { "army.screen.btn_inspect", "معاينة الفصيل" },
+            { "army.screen.queue_empty", "لا توجد عمليات تعبئة جارية" },
+
+            // Recruitment Drawer UI
+            { "army.drawer.title", "تعبئة الفصائل العسكرية" },
+            { "army.drawer.quantity", "حجم الدفعة" },
+            { "army.drawer.total_cost", "تكاليف التعبئة والتسليح" },
+            { "army.drawer.training_time", "مدة التدريب" },
+            { "army.drawer.req_building", "يتطلب {0} مستوى {1}" },
+            { "army.drawer.req_met", "الشروط التكتيكية مكتملة" },
+            { "army.drawer.req_not_met", "مستوى المنشأة غير كافٍ" },
+            { "army.drawer.action_recruit", "بدء التعبئة والتدريب" },
+            { "army.drawer.action_cancel", "إلغاء التعبئة" },
+            { "army.drawer.training_progress", "عمليات التدريب جارية..." },
+            { "army.drawer.time_remaining", "الوقت المتبقي: {0}" },
+            { "army.drawer.queue_full", "طاقة طابور التدريب بلغت الحد الأقصى" },
+            { "army.cancel_dialog.title", "إلغاء أمر التعبئة" },
+            { "army.cancel_dialog.msg", "هل أنت متأكد من إلغاء أمر تعبئة القوات؟ ستتم استعادة الموارد." }
         };
     }
 }

@@ -1,7 +1,7 @@
 # PROJECT STATE — KING WORLD WAR
 
-**Last Updated:** Phase 05 (Player Base & Building Systems)  
-**Active Branch:** `phase-05/player-base`  
+**Last Updated:** Phase 06 (Army & Military Units: Recruitment, Formations, Combat Stats)  
+**Active Branch:** `phase-06/army-units`  
 **Engine:** Unity 6 (`6000.6.9f1`)  
 **Active Render Pipeline:** Universal Render Pipeline (URP 17.6.0)
 
@@ -114,6 +114,35 @@
   - **40 PlayMode tests** (including 9 `PlayerBaseInteractionTests` and updated `BootstrapFlowTests`).
   - **131 total automated tests across all suites (100% pass rate, 0 failed, 0 errors).**
 
+### Phase 06 — Army & Military Units (Recruitment, Formations, Combat Stats)
+- **Unit Archetypes & Combat Domain:**
+  - 4 foundational military unit archetypes in `KingWorldWar.Core.Army`: Tactical Infantry (`UnitType.Infantry`), Armored Recon (`UnitType.ReconVehicle`), Main Battle Tank (`UnitType.Tank`), and Heavy Artillery (`UnitType.Artillery`).
+  - Robust immutable `UnitId` struct and comprehensive `UnitStats` model (Health, Attack, Defense, Speed, Range, Combat Power auto-calculation).
+  - Deterministic combat power rating formula: $\text{CombatPower} = (\text{Attack} \times 2) + (\text{Defense} \times 2) + \lfloor\text{Health} / 5\rfloor$.
+  - Resource costs (`UnitCost`) in Gold, Oil, Iron, and duration in seconds, with batch scaling (`Multiply`).
+  - Base building prerequisite gating integrated with `IBaseStateRepository` (Barracks Lv 1/2, Vehicle Factory Lv 1/2).
+- **Recruitment Queue System & Standing Roster:**
+  - `RecruitmentQueueItem` tracking `StartTimeUtc` and `EndTimeUtc` for tamper-resistant progress calculation.
+  - Concurrent training queues (up to 2 concurrent operations) with deterministic completion resolution.
+  - Standing `ArmyRoster` tracking mobilized forces and total aggregate army combat power rating.
+  - Pure C# service contracts: `IArmyDataSource`, `IArmyStateRepository`, and `IArmyService`.
+- **3D Army View & Parade Ground:**
+  - `PlayerArmyView` situated at world position $(400, 0, 0)$ in `MainMenu.unity`.
+  - Spawns all 4 unit archetypes with dedicated collider bounds, golden circular selection rings, and real-time world-space countdown billboards.
+  - Raycast selection supporting desktop mouse and mobile multi-touch with smooth camera rig target tracking.
+- **UI Army Screen & Recruitment Drawer:**
+  - Replaces placeholder screen for `ScreenId.Army` with production `ArmyScreenView` displaying total combat power badge, total forces count, active training operations count, and 4 unit cards.
+  - Slide-in `RecruitmentDrawer` featuring unit stats, quantity stepper (`-`, `+`, `Max`), cost breakdown, prerequisite badge, Commence Mobilization button, active training progress bar with countdown, and cancel button with modal confirmation.
+- **Bilingual Military Localization:**
+  - 100% string key parity in Arabic RTL and English for all unit names, descriptions, roles, combat stats, and drawer UI controls.
+  - All Phase 6 Arabic terms cataloged in `docs/localization/REVIEW_QUEUE.md` flagged as `Needs Human Review`.
+- **Documentation:**
+  - Created `docs/army/ARMY_UNITS_SPEC.md` and `docs/army/ADDING_UNITS.md`.
+- **Automated Test Coverage:**
+  - **110 EditMode tests** (including 8 new `ArmyDataTests`, 8 new `ArmyServiceTests`, and 3 new `ArmyLocalizationTests`).
+  - **50 PlayMode tests** (including 10 new `ArmyInteractionTests` and updated `BootstrapFlowTests`).
+  - **160 total automated tests across all suites (100% pass rate, 0 failed, 0 errors).**
+
 ---
 
 ## 2. DECISIONS REGISTER
@@ -127,6 +156,7 @@
 - **Client Trust:** Zero authoritative logic on the client; currency and battle resolution reserved for Nakama server.
 - **ADR-0004 (World Map Topology & Untrusted Client):** All 25 territories and 5 regions are declared via pure C# domain contracts and immutable ScriptableObject configs. The graph topology enforces 100% bidirectional symmetry and single-component connectivity. All territory runtime values (yields, defense, ownership) are strictly non-authoritative client displays with explicit warnings until server-synchronized in Phase 8/9. Colorblind accessibility symbols (`★`, `◆`, `✖`, `▲`) accompany faction colors.
 - **ADR-0005 (Player Base Grid & Upgrade Architecture):** Tactical base operations use a $20 \times 20$ discrete grid with rectangular footprint occupancy. Upgrades enforce Command Center prerequisite tier gating. Client upgrade countdowns rely on UTC timestamps and asynchronous contracts (`Task<Result<...>>`) to cleanly bridge from local in-memory simulation to authoritative Nakama RPCs in Phase 8.
+- **ADR-0006 (Army Units & Recruitment Architecture):** Military units use pure C# domain definitions and auto-calculating combat power ratings. Recruitment queues are capped at 2 concurrent operations and rely on UTC timestamps for tamper-resistant client progression. Unit recruitment and standing rosters are explicitly modeled as client-side simulations; authoritative inventory and training verification will be processed via Nakama PostgreSQL transactions in Phase 8/9.
 
 ---
 
@@ -142,6 +172,17 @@
 ---
 
 ## 4. HOW TO RUN
+
+### Running the Army Screen & Military Units in Main Menu
+1. Open `Assets/KINGWorldWar/Scenes/MainMenu.unity`.
+2. Enter Play Mode.
+3. In the bottom navigation bar, tap the **Army** tab. The view smoothly transitions to the 3D parade staging ground at offset $(400, 0, 0)$ and displays the full-screen `ArmyScreenView`.
+4. Observe the Military Command dashboard displaying: Total Combat Power badge, Total Forces count, Active Training Operations count, and 4 unit cards (Tactical Infantry, Armored Recon, Main Battle Tank, Heavy Artillery).
+5. Click **Recruit** on any unit card (or click/tap the 3D unit models directly) to slide open the `RecruitmentDrawer`.
+6. Use the quantity stepper (`-`, `+`, `Max`) to adjust batch count; observe immediate real-time cost and duration scaling.
+7. Click **Commence Mobilization** to start training; observe the live progress bar and countdown timer in both the drawer and the 3D world-space billboard.
+8. Click **Cancel Mobilization** to abort recruitment with a modal confirmation prompt.
+9. Tap the "عربي" / "EN" button in the top navigation bar to observe instant real-time bilingual switching and Arabic RTL shaping across all army screens and drawers.
 
 ### Running the Player Base in Main Menu
 1. Open `Assets/KINGWorldWar/Scenes/MainMenu.unity`.

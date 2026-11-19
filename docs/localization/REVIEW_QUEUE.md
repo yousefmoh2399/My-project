@@ -53,6 +53,15 @@
 | `building.factory.name` | Vehicle Factory | مصنع الآليات | Base / Building | `Needs Human Review` | Armored vehicle production. |
 | `base.drawer.action_upgrade` | Upgrade | ترقية | Base / UI | `Needs Human Review` | Structure upgrade button. |
 | `base.cancel_dialog.title` | Cancel Construction | إلغاء أعمال الترقية | Base / UI | `Needs Human Review` | Upgrade cancellation prompt. |
+| `unit.infantry.name` | Tactical Infantry | مشاة تكتيكية | Army / Units | `Needs Human Review` | Frontline combat infantry squad. |
+| `unit.tank.name` | Main Battle Tank | دبابة قتال رئيسية | Army / Units | `Needs Human Review` | Heavy armored assault tank. |
+| `unit.artillery.name` | Heavy Artillery | مدفعية ثقيلة | Army / Units | `Needs Human Review` | Long-range self-propelled bombardment. |
+| `unit.recon.name` | Armored Recon Vehicle | مركبة استطلاع مدرعة | Army / Units | `Needs Human Review` | Fast light scout vehicle. |
+| `unit.stat.power` | Combat Power | القوة القتالية | Army / Stats | `Needs Human Review` | Standard military combat power rating. |
+| `army.screen.title` | Military Command | قيادة الجيش والقوات | Army / UI | `Needs Human Review` | Main army screen header. |
+| `army.drawer.title` | Troop Mobilization | تعبئة الفصائل العسكرية | Army / UI | `Needs Human Review` | Recruitment drawer header. |
+| `army.drawer.action_recruit` | Commence Mobilization | بدء التعبئة والتدريب | Army / UI | `Needs Human Review` | Recruitment order action button. |
+| `army.cancel_dialog.title` | Abort Mobilization | إلغاء أمر التعبئة | Army / UI | `Needs Human Review` | Recruitment cancel dialog title. |
 
 ---
 

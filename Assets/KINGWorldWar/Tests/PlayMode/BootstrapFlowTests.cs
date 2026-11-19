@@ -1,5 +1,6 @@
 using System.Collections;
 using KingWorldWar.App;
+using KingWorldWar.Core.Army;
 using KingWorldWar.Core.Base;
 using KingWorldWar.Core.Localization;
 using KingWorldWar.Core.Logging;
@@ -92,6 +93,15 @@ namespace KingWorldWar.Tests.PlayMode
 
             Assert.IsTrue(container.TryResolve<IPlayerBaseService>(out var resolvedBaseService));
             Assert.IsNotNull(resolvedBaseService);
+
+            Assert.IsTrue(container.TryResolve<IArmyService>(out var resolvedArmyService));
+            Assert.IsNotNull(resolvedArmyService);
+
+            Assert.IsTrue(container.TryResolve<IArmyDataSource>(out var resolvedArmyDataSource));
+            Assert.IsNotNull(resolvedArmyDataSource);
+
+            Assert.IsTrue(container.TryResolve<IArmyStateRepository>(out var resolvedArmyRepo));
+            Assert.IsNotNull(resolvedArmyRepo);
         }
     }
 }

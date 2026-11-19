@@ -58,6 +58,12 @@ namespace KingWorldWar.Features.Camera
         public Vector2 MinBounds => _minBounds;
         public Vector2 MaxBounds => _maxBounds;
 
+        public void SetBounds(Vector2 min, Vector2 max)
+        {
+            _minBounds = min;
+            _maxBounds = max;
+        }
+
         public static CameraConfigSO CreateDefaultInstance()
         {
             var config = CreateInstance<CameraConfigSO>();

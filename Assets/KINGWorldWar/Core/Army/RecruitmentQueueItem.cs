@@ -1,0 +1,63 @@
+using System;
+
+namespace KingWorldWar.Core.Army
+{
+    /// <summary>
+    /// Represents an active or completed unit recruitment queue operation.
+    /// Uses UTC timestamps strictly to prevent client-side clock tampering.
+    /// Tagged as NonAuthoritative display model until server confirmation in Phase 8.
+    /// </summary>
+    [Serializable]
+    public sealed class RecruitmentQueueItem
+    {
+        public string QueueId { get; }
+        public UnitType Type { get; }
+        public int Count { get; }
+        public DateTime StartTimeUtc { get; }
+        public DateTime EndTimeUtc { get; }
+        public UnitCost TotalCost { get; }
+
+        public double TotalDurationSeconds => (EndTimeUtc - StartTimeUtc).TotalSeconds;
+
+        public RecruitmentQueueItem(
+            string queueId,
+            UnitType type,
+            int count,
+            DateTime startTimeUtc,
+            DateTime endTimeUtc,
+            UnitCost totalCost)
+        {
+            if (string.IsNullOrWhiteSpace(queueId)) throw new ArgumentException("QueueId cannot be null or whitespace.", nameof(queueId));
+            if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count), "Count must be greater than zero.");
+            if (endTimeUtc < startTimeUtc) throw new ArgumentException("EndTimeUtc cannot be earlier than StartTimeUtc.");
+
+            QueueId = queueId;
+            Type = type;
+            Count = count;
+            StartTimeUtc = startTimeUtc;
+            EndTimeUtc = endTimeUtc;
+            TotalCost = totalCost;
+        }
+
+        public double RemainingSeconds(DateTime utcNow)
+        {
+            if (utcNow >= EndTimeUtc) return 0.0;
+            return (EndTimeUtc - utcNow).TotalSeconds;
+        }
+
+        public float ProgressNormalized(DateTime utcNow)
+        {
+            var total = TotalDurationSeconds;
+            if (total <= 0.0) return 1.0f;
+            if (utcNow <= StartTimeUtc) return 0.0f;
+            if (utcNow >= EndTimeUtc) return 1.0f;
+
+            var elapsed = (utcNow - StartTimeUtc).TotalSeconds;
+            return Math.Clamp((float)(elapsed / total), 0.0f, 1.0f);
+        }
+
+        public bool IsCompleted(DateTime utcNow) => utcNow >= EndTimeUtc;
+
+        public override string ToString() => $"RecruitmentQueue [{QueueId}] {Type} x{Count} (Ends: {EndTimeUtc:O})";
+    }
+}

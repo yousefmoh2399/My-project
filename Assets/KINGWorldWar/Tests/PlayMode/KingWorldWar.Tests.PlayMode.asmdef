@@ -9,6 +9,7 @@
     "KingWorldWar.Features.Camera",
     "KingWorldWar.Features.WorldMap",
     "KingWorldWar.Features.Base",
+    "KingWorldWar.Features.Army",
     "Unity.TextMeshPro",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"
