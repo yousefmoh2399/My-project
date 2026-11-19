@@ -1,7 +1,7 @@
 # PROJECT STATE — KING WORLD WAR
 
-**Last Updated:** Phase 02 (3D Visual Foundation, URP, Camera Rig, Quality Tiers)  
-**Active Branch:** `phase-02/visual-foundation`  
+**Last Updated:** Phase 03 (UI Foundation & Localization — Arabic RTL + English)  
+**Active Branch:** `phase-03/ui-localization`  
 **Engine:** Unity 6 (`6000.6.9f1`)  
 **Active Render Pipeline:** Universal Render Pipeline (URP 17.6.0)
 
@@ -46,6 +46,24 @@
 - Documented `docs/ASSET_PROVENANCE.md` (100% original, $0 third-party assets) and `docs/QUALITY_TIERS.md`.
 - Automated test coverage: **33 EditMode tests + 14 PlayMode tests = 47 total tests (100% pass rate)**.
 
+### Phase 03 — UI Foundation & Localization (Arabic RTL + English)
+- **UI Stack:** Native UGUI + TextMeshPro with reference resolution `1080x1920` (Match 0.5) conforming to mobile safe-area (`SafeAreaFitter`).
+- **Localization Subsystem:** Lightweight, pure C# `LocalizationService` supporting instant runtime language toggling without application restart.
+- **Pure C# Arabic Text Shaper:** `ArabicTextShaper` in `KingWorldWar.Core.Localization` supporting contextual Presentation Forms-B glyph mapping, Lam-Alif ligatures, and bidirectional formatting preserving LTR digits in mixed Arabic runs (e.g. `"المستوى 15"`).
+- **Navigation Subsystem:** Stack-based `IScreenNavigationService` and `ScreenNavigationService` with push, pop, replace, history tracking, and Android hardware Back button / Keyboard `Escape` support.
+- **Modal Dialog Subsystem:** Queueing modal service `IModalService` and `ModalService` with sequential FIFO presentation, backdrop click dismiss, and raycast blocking (`ModalDialogView`).
+- **Reusable Tactical Components:**
+  - `SafeAreaFitter`: Anchors canvas views dynamically to `Screen.safeArea`.
+  - `KwwButton`: Enforces mobile accessibility minimum touch targets (>= 48x48dp) and WCAG compliant palettes.
+  - `LocalizedText`: Auto-subscribes to language changes, reshapes Arabic text, and auto-mirrors text alignment.
+  - `ResourceHeaderView`: Top-bar readout for non-authoritative client values of Gold, Oil, and Iron.
+- **Main Menu Shell (`Assets/KINGWorldWar/Scenes/MainMenu.unity`):** Built with bottom bar holding 6 placeholder tabs (World, Base, Army, Alliance, Rankings, Profile), Back button, Language toggle button ("عربي" / "EN"), and top resource header.
+- **Documentation:** Created `docs/localization/HOWTO_ADD_STRINGS.md`, `docs/localization/REVIEW_QUEUE.md` (flagging all Arabic military terms as "needs human review"), and `docs/ui/UI_GUIDE.md`.
+- **Automated Test Coverage:**
+  - 53 EditMode tests (including 7 `ArabicTextShaperTests`, 6 `LocalizationServiceTests` with strict key parity, 4 `NavigationStackTests`, 3 `ModalServiceTests`).
+  - 21 PlayMode tests (including 7 `MainMenuNavigationTests` and updated `BootstrapFlowTests`).
+  - **74 total automated tests (100% pass rate, 0 errors, 0 warnings).**
+
 ---
 
 ## 2. DECISIONS REGISTER
@@ -54,6 +72,8 @@
 - **Render Pipeline:** Universal Render Pipeline (URP 17.6.0) with dedicated per-tier assets (`URP_Asset_Low`, `URP_Asset_Medium`, `URP_Asset_High`).
 - **Visual Identity:** 100% original procedural low-poly military strategy style. Official palette: Charcoal `#1F2421`, Steel Gray `#4A5568`, Muted Military Green `#3E4E3D`, Restrained Gold `#D4AF37`.
 - **Camera Controls:** Decoupled math (`CameraMath`) from MonoBehaviour rig (`StrategyCameraRig`), bounded horizontal panning and zoom heights, New Input System integration.
+- **Localization & BiDi Strategy:** Custom pure C# string table engine with zero third-party packages ($0 cost). Pure C# contextual Arabic shaping converting to Presentation Forms-B and preserving LTR digit order for TextMeshPro. Strict key parity enforced via automated unit tests.
+- **Accessibility & Touch Targets:** All interactive buttons enforce minimum dimensions of 48x48dp per mobile accessibility standards (Apple HIG and Google Material).
 - **Client Trust:** Zero authoritative logic on the client; currency and battle resolution reserved for Nakama server.
 
 ---

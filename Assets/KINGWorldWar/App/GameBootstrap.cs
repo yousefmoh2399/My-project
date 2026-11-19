@@ -1,11 +1,17 @@
 using System;
 using System.Threading.Tasks;
 using KingWorldWar.Core.Common;
+using KingWorldWar.Core.Localization;
 using KingWorldWar.Core.Logging;
 using KingWorldWar.Core.Networking;
+using KingWorldWar.Core.Quality;
 using KingWorldWar.Core.Scenes;
+using KingWorldWar.Core.UI;
 using KingWorldWar.Infrastructure.Config;
+using KingWorldWar.Infrastructure.Localization;
+using KingWorldWar.Infrastructure.Quality;
 using KingWorldWar.Infrastructure.Scenes;
+using KingWorldWar.Infrastructure.UI;
 using KingWorldWar.UI.ErrorScreen;
 using UnityEngine;
 
@@ -115,6 +121,10 @@ namespace KingWorldWar.App
             container.Register<GameConfig>(_config);
             container.Register<ILog>(log);
             container.Register<ISceneLoader>(new UnitySceneLoader(log));
+            container.Register<IQualityService>(new QualityService(log));
+            container.Register<ILocalizationService>(new LocalizationService(log));
+            container.Register<IScreenNavigationService>(new ScreenNavigationService(log));
+            container.Register<IModalService>(new ModalService(log));
             container.Register<IAuthService>(new NullAuthService());
             container.Register<IPlayerRepository>(new NullPlayerRepository());
 
