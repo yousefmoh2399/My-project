@@ -11,7 +11,8 @@ namespace KingWorldWar.UI.Army
     /// <summary>
     /// Main tactical army management screen (replaces placeholder for ScreenId.Army).
     /// Displays commander combat rating, total mobilized troop strength, active training queues,
-    /// and archetype mobilization cards.
+    /// categorized unit grid (Ground and Air), status breakdown (Available, InTraining, Deployed),
+    /// and archetype inspection / mobilization cards.
     /// </summary>
     public class ArmyScreenView : MonoBehaviour
     {
@@ -24,44 +25,73 @@ namespace KingWorldWar.UI.Army
         [SerializeField] private TextMeshProUGUI _activeQueuesLabel;
         [SerializeField] private TextMeshProUGUI _activeQueuesValue;
 
-        [Header("Drawer Reference")]
-        [SerializeField] private RecruitmentDrawer _recruitmentDrawer;
+        [Header("Category Filter Tabs")]
+        [SerializeField] private Button _tabAllUnits;
+        [SerializeField] private Button _tabGroundUnits;
+        [SerializeField] private Button _tabAirUnits;
 
-        [Header("Unit Roster Cards")]
+        [Header("Drawer & Detail References")]
+        [SerializeField] private RecruitmentDrawer _recruitmentDrawer;
+        [SerializeField] private UnitDetailView _unitDetailView;
+
+        [Header("Ground Units Cards")]
+        [SerializeField] private UnitCardUI _tankCard;
+        [SerializeField] private UnitCardUI _armoredVehicleCard;
+        [SerializeField] private UnitCardUI _artilleryCard;
+
+        [Header("Air Units Cards")]
+        [SerializeField] private UnitCardUI _fighterAircraftCard;
+        [SerializeField] private UnitCardUI _reconAircraftCard;
+
+        [Header("Legacy Compatibility Cards")]
         [SerializeField] private UnitCardUI _infantryCard;
         [SerializeField] private UnitCardUI _reconCard;
-        [SerializeField] private UnitCardUI _tankCard;
-        [SerializeField] private UnitCardUI _artilleryCard;
 
         private IArmyService _armyService;
         private ILocalizationService _loc;
+        private UnitCategory? _activeCategoryFilter = null; // null = All
 
         public TextMeshProUGUI TitleText => _titleText;
         public TextMeshProUGUI CombatPowerValue => _combatPowerValue;
         public TextMeshProUGUI TotalTroopsValue => _totalTroopsValue;
         public TextMeshProUGUI ActiveQueuesValue => _activeQueuesValue;
         public RecruitmentDrawer RecruitmentDrawer => _recruitmentDrawer;
+        public UnitDetailView UnitDetailView => _unitDetailView;
+
+        public UnitCardUI TankCard => _tankCard;
+        public UnitCardUI ArmoredVehicleCard => _armoredVehicleCard;
+        public UnitCardUI ArtilleryCard => _artilleryCard;
+        public UnitCardUI FighterAircraftCard => _fighterAircraftCard;
+        public UnitCardUI ReconAircraftCard => _reconAircraftCard;
+
         public UnitCardUI InfantryCard => _infantryCard;
         public UnitCardUI ReconCard => _reconCard;
-        public UnitCardUI TankCard => _tankCard;
-        public UnitCardUI ArtilleryCard => _artilleryCard;
+
+        public UnitCategory? ActiveCategoryFilter => _activeCategoryFilter;
 
         [Serializable]
         public class UnitCardUI
         {
+            public GameObject Root;
             public UnitType Type;
             public TextMeshProUGUI NameText;
             public TextMeshProUGUI RoleText;
             public TextMeshProUGUI CountText;
             public TextMeshProUGUI PowerText;
             public TextMeshProUGUI PrereqText;
+            public TextMeshProUGUI StatusBreakdownText;
             public Button RecruitButton;
             public TextMeshProUGUI RecruitButtonText;
+            public Button InspectButton;
             public GameObject TrainingBadge;
             public TextMeshProUGUI TrainingCountdown;
         }
 
-        public void Initialize(IArmyService armyService, ILocalizationService loc, RecruitmentDrawer drawer)
+        public void Initialize(
+            IArmyService armyService,
+            ILocalizationService loc,
+            RecruitmentDrawer drawer,
+            UnitDetailView detailView = null)
         {
             if (_armyService != null)
             {
@@ -79,8 +109,10 @@ namespace KingWorldWar.UI.Army
             _armyService = armyService;
             _loc = loc;
             _recruitmentDrawer = drawer;
+            _unitDetailView = detailView;
 
             BindCardButtons();
+            BindCategoryTabs();
 
             if (_armyService != null)
             {
@@ -114,23 +146,70 @@ namespace KingWorldWar.UI.Army
             }
         }
 
+        private void BindCategoryTabs()
+        {
+            if (_tabAllUnits != null)
+            {
+                _tabAllUnits.onClick.RemoveAllListeners();
+                _tabAllUnits.onClick.AddListener(() => FilterCategory(null));
+            }
+
+            if (_tabGroundUnits != null)
+            {
+                _tabGroundUnits.onClick.RemoveAllListeners();
+                _tabGroundUnits.onClick.AddListener(() => FilterCategory(UnitCategory.Ground));
+            }
+
+            if (_tabAirUnits != null)
+            {
+                _tabAirUnits.onClick.RemoveAllListeners();
+                _tabAirUnits.onClick.AddListener(() => FilterCategory(UnitCategory.Air));
+            }
+        }
+
+        public void FilterCategory(UnitCategory? category)
+        {
+            _activeCategoryFilter = category;
+            Refresh();
+        }
+
         private void BindCardButtons()
         {
+            // MVP 5 archetypes
+            BindCard(_tankCard, UnitType.Tank);
+            BindCard(_armoredVehicleCard, UnitType.ArmoredVehicle);
+            BindCard(_artilleryCard, UnitType.Artillery);
+            BindCard(_fighterAircraftCard, UnitType.FighterAircraft);
+            BindCard(_reconAircraftCard, UnitType.ReconAircraft);
+
+            // Legacy backward compatibility cards
             BindCard(_infantryCard, UnitType.Infantry);
             BindCard(_reconCard, UnitType.ReconVehicle);
-            BindCard(_tankCard, UnitType.Tank);
-            BindCard(_artilleryCard, UnitType.Artillery);
         }
 
         private void BindCard(UnitCardUI card, UnitType type)
         {
-            if (card != null && card.RecruitButton != null)
+            if (card == null) return;
+            card.Type = type;
+
+            if (card.RecruitButton != null)
             {
-                card.Type = type;
                 card.RecruitButton.onClick.RemoveAllListeners();
                 card.RecruitButton.onClick.AddListener(() =>
                 {
                     _recruitmentDrawer?.OpenForUnit(type);
+                });
+            }
+
+            if (card.InspectButton != null)
+            {
+                card.InspectButton.onClick.RemoveAllListeners();
+                card.InspectButton.onClick.AddListener(() =>
+                {
+                    if (_armyService != null && _armyService.DataSource.TryGetDefinition(type, out var def))
+                    {
+                        _unitDetailView?.Open(def);
+                    }
                 });
             }
         }
@@ -143,6 +222,7 @@ namespace KingWorldWar.UI.Army
             var ds = _armyService.DataSource;
             var queues = _armyService.GetActiveQueues();
             int totalPower = _armyService.GetTotalCombatPower();
+            var snapshot = _armyService.CurrentSnapshot;
 
             // Header readouts
             if (_titleText != null)
@@ -167,7 +247,8 @@ namespace KingWorldWar.UI.Army
 
             if (_totalTroopsValue != null)
             {
-                _totalTroopsValue.text = $"{roster.TotalTroops:N0}";
+                int totalCount = snapshot != null ? snapshot.TotalForcesCount : roster.TotalTroops;
+                _totalTroopsValue.text = $"{totalCount:N0}";
             }
 
             if (_activeQueuesLabel != null)
@@ -177,14 +258,20 @@ namespace KingWorldWar.UI.Army
 
             if (_activeQueuesValue != null)
             {
-                _activeQueuesValue.text = $"{queues.Count} / {_armyService.StateRepository.MaxConcurrentQueues}";
+                int maxQ = _armyService.MaxConcurrentQueues;
+                _activeQueuesValue.text = $"{queues.Count} / {maxQ}";
             }
 
             // Cards refresh
-            RefreshCard(_infantryCard, UnitType.Infantry, roster, ds, queues);
-            RefreshCard(_reconCard, UnitType.ReconVehicle, roster, ds, queues);
-            RefreshCard(_tankCard, UnitType.Tank, roster, ds, queues);
-            RefreshCard(_artilleryCard, UnitType.Artillery, roster, ds, queues);
+            RefreshCard(_tankCard, UnitType.Tank, roster, ds, queues, snapshot);
+            RefreshCard(_armoredVehicleCard, UnitType.ArmoredVehicle, roster, ds, queues, snapshot);
+            RefreshCard(_artilleryCard, UnitType.Artillery, roster, ds, queues, snapshot);
+            RefreshCard(_fighterAircraftCard, UnitType.FighterAircraft, roster, ds, queues, snapshot);
+            RefreshCard(_reconAircraftCard, UnitType.ReconAircraft, roster, ds, queues, snapshot);
+
+            // Legacy
+            RefreshCard(_infantryCard, UnitType.Infantry, roster, ds, queues, snapshot);
+            RefreshCard(_reconCard, UnitType.ReconVehicle, roster, ds, queues, snapshot);
         }
 
         private void RefreshCard(
@@ -192,9 +279,18 @@ namespace KingWorldWar.UI.Army
             UnitType type,
             ArmyRoster roster,
             IArmyDataSource ds,
-            IReadOnlyList<RecruitmentQueueItem> queues)
+            IReadOnlyList<RecruitmentQueueItem> queues,
+            ArmyRosterSnapshot snapshot)
         {
             if (card == null || !ds.TryGetDefinition(type, out var def)) return;
+
+            // Category filter visibility
+            if (_activeCategoryFilter != null && def.Category != _activeCategoryFilter)
+            {
+                if (card.Root != null) card.Root.SetActive(false);
+                return;
+            }
+            if (card.Root != null) card.Root.SetActive(true);
 
             if (card.NameText != null)
             {
@@ -206,11 +302,23 @@ namespace KingWorldWar.UI.Army
                 card.RoleText.text = _loc != null ? _loc.GetString(def.RoleKey) : string.Empty;
             }
 
-            int count = roster.GetCount(type);
+            int count = snapshot != null ? snapshot.GetTotalOwnedCount(type) : roster.GetCount(type);
+            int available = snapshot != null ? snapshot.GetAvailableCount(type) : count;
+            int inTraining = snapshot != null ? snapshot.GetInTrainingCount(type) : 0;
+            int deployed = snapshot != null ? snapshot.GetDeployedCount(type) : 0;
+
             if (card.CountText != null)
             {
                 string countFormat = _loc != null ? _loc.GetString("army.screen.roster_count") : "Mobilized: {0}";
                 card.CountText.text = string.Format(countFormat, count);
+            }
+
+            if (card.StatusBreakdownText != null)
+            {
+                string availStr = _loc?.GetString("army.status.available") ?? "Avail";
+                string trainStr = _loc?.GetString("army.status.in_training") ?? "Train";
+                string depStr = _loc?.GetString("army.status.deployed") ?? "Dep";
+                card.StatusBreakdownText.text = $"{availStr}: {available} | {trainStr}: {inTraining} | {depStr}: {deployed}";
             }
 
             int archetypePower = def.Stats.CombatPower * count;
@@ -305,7 +413,11 @@ namespace KingWorldWar.UI.Army
             UnitCardUI infantryCard,
             UnitCardUI reconCard,
             UnitCardUI tankCard,
-            UnitCardUI artilleryCard)
+            UnitCardUI artilleryCard,
+            UnitCardUI armoredVehicleCard = null,
+            UnitCardUI fighterCard = null,
+            UnitCardUI reconAirCard = null,
+            UnitDetailView detailView = null)
         {
             _titleText = titleText;
             _combatPowerValue = combatPowerValue;
@@ -316,6 +428,10 @@ namespace KingWorldWar.UI.Army
             _reconCard = reconCard;
             _tankCard = tankCard;
             _artilleryCard = artilleryCard;
+            _armoredVehicleCard = armoredVehicleCard;
+            _fighterAircraftCard = fighterCard;
+            _reconAircraftCard = reconAirCard;
+            _unitDetailView = detailView;
 
             BindCardButtons();
         }

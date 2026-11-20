@@ -24,10 +24,13 @@ namespace KingWorldWar.Features.Army
         [SerializeField] private Transform _unitsContainer;
 
         [Header("Unit Archetype Prefabs")]
+        [SerializeField] private GameObject _tankPrefab;
+        [SerializeField] private GameObject _armoredVehiclePrefab;
+        [SerializeField] private GameObject _artilleryPrefab;
+        [SerializeField] private GameObject _fighterAircraftPrefab;
+        [SerializeField] private GameObject _reconAircraftPrefab;
         [SerializeField] private GameObject _infantryPrefab;
         [SerializeField] private GameObject _reconPrefab;
-        [SerializeField] private GameObject _tankPrefab;
-        [SerializeField] private GameObject _artilleryPrefab;
 
         private IArmyService _armyService;
         private ILocalizationService _loc;
@@ -244,10 +247,13 @@ namespace KingWorldWar.Features.Army
             // Archetype layout on inspection grounds (relative to base transform at 400,0,0)
             var offsets = new Dictionary<UnitType, Vector3>
             {
-                { UnitType.Infantry, new Vector3(-12f, 0f, 8f) },
-                { UnitType.ReconVehicle, new Vector3(12f, 0f, 8f) },
-                { UnitType.Tank, new Vector3(-12f, 0f, -8f) },
-                { UnitType.Artillery, new Vector3(12f, 0f, -8f) }
+                { UnitType.Tank, new Vector3(-14f, 0f, -8f) },
+                { UnitType.ArmoredVehicle, new Vector3(0f, 0f, -8f) },
+                { UnitType.Artillery, new Vector3(14f, 0f, -8f) },
+                { UnitType.FighterAircraft, new Vector3(-10f, 0f, 8f) },
+                { UnitType.ReconAircraft, new Vector3(10f, 0f, 8f) },
+                { UnitType.Infantry, new Vector3(-20f, 0f, 0f) },
+                { UnitType.ReconVehicle, new Vector3(20f, 0f, 0f) }
             };
 
             foreach (var kvp in offsets)
@@ -301,10 +307,13 @@ namespace KingWorldWar.Features.Army
         {
             return type switch
             {
+                UnitType.Tank => _tankPrefab,
+                UnitType.ArmoredVehicle => _armoredVehiclePrefab,
+                UnitType.Artillery => _artilleryPrefab,
+                UnitType.FighterAircraft => _fighterAircraftPrefab,
+                UnitType.ReconAircraft => _reconAircraftPrefab,
                 UnitType.Infantry => _infantryPrefab,
                 UnitType.ReconVehicle => _reconPrefab,
-                UnitType.Tank => _tankPrefab,
-                UnitType.Artillery => _artilleryPrefab,
                 _ => null
             };
         }
@@ -316,10 +325,13 @@ namespace KingWorldWar.Features.Army
             // Tactical military colors
             Color bodyColor = type switch
             {
-                UnitType.Infantry => new Color(0.24f, 0.31f, 0.24f), // Muted Olive Green
-                UnitType.ReconVehicle => new Color(0.35f, 0.40f, 0.35f), // Steel Olive
                 UnitType.Tank => new Color(0.20f, 0.22f, 0.20f), // Charcoal Armor
+                UnitType.ArmoredVehicle => new Color(0.28f, 0.35f, 0.28f), // Military Olive
                 UnitType.Artillery => new Color(0.28f, 0.28f, 0.30f), // Gunmetal Gray
+                UnitType.FighterAircraft => new Color(0.18f, 0.20f, 0.24f), // Night Charcoal
+                UnitType.ReconAircraft => new Color(0.35f, 0.38f, 0.40f), // High-Alt Gray
+                UnitType.Infantry => new Color(0.24f, 0.31f, 0.24f),
+                UnitType.ReconVehicle => new Color(0.35f, 0.40f, 0.35f),
                 _ => Color.gray
             };
 
@@ -365,6 +377,28 @@ namespace KingWorldWar.Features.Army
                 turret.GetComponent<MeshRenderer>().material = mat;
                 barrel.GetComponent<MeshRenderer>().material = mat;
             }
+            else if (type == UnitType.ArmoredVehicle)
+            {
+                chassis.transform.localPosition = new Vector3(0f, 0.6f, 0f);
+                chassis.transform.localScale = new Vector3(2.4f, 0.9f, 3.8f);
+
+                var turret = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                turret.transform.SetParent(root.transform, false);
+                turret.transform.localPosition = new Vector3(0f, 1.3f, 0.3f);
+                turret.transform.localScale = new Vector3(1.1f, 0.5f, 1.1f);
+
+                var autocannon = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                autocannon.transform.SetParent(turret.transform, false);
+                autocannon.transform.localPosition = new Vector3(0f, 0.1f, 1.0f);
+                autocannon.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+                autocannon.transform.localScale = new Vector3(0.12f, 1.0f, 0.12f);
+
+                var mat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+                mat.color = bodyColor;
+                chassis.GetComponent<MeshRenderer>().material = mat;
+                turret.GetComponent<MeshRenderer>().material = mat;
+                autocannon.GetComponent<MeshRenderer>().material = mat;
+            }
             else if (type == UnitType.Artillery)
             {
                 chassis.transform.localPosition = new Vector3(0f, 0.6f, 0f);
@@ -381,7 +415,37 @@ namespace KingWorldWar.Features.Army
                 chassis.GetComponent<MeshRenderer>().material = mat;
                 gun.GetComponent<MeshRenderer>().material = mat;
             }
-            else // ReconVehicle
+            else if (type == UnitType.FighterAircraft)
+            {
+                chassis.transform.localPosition = new Vector3(0f, 1.2f, 0f);
+                chassis.transform.localScale = new Vector3(1.2f, 0.8f, 4.8f);
+
+                var wings = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                wings.transform.SetParent(root.transform, false);
+                wings.transform.localPosition = new Vector3(0f, 1.2f, 0.2f);
+                wings.transform.localScale = new Vector3(5.5f, 0.1f, 1.8f);
+
+                var mat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+                mat.color = bodyColor;
+                chassis.GetComponent<MeshRenderer>().material = mat;
+                wings.GetComponent<MeshRenderer>().material = mat;
+            }
+            else if (type == UnitType.ReconAircraft)
+            {
+                chassis.transform.localPosition = new Vector3(0f, 1.2f, 0f);
+                chassis.transform.localScale = new Vector3(0.9f, 0.6f, 4.0f);
+
+                var wings = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                wings.transform.SetParent(root.transform, false);
+                wings.transform.localPosition = new Vector3(0f, 1.3f, 0.4f);
+                wings.transform.localScale = new Vector3(7.5f, 0.08f, 1.0f);
+
+                var mat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+                mat.color = bodyColor;
+                chassis.GetComponent<MeshRenderer>().material = mat;
+                wings.GetComponent<MeshRenderer>().material = mat;
+            }
+            else // Legacy ReconVehicle
             {
                 chassis.transform.localPosition = new Vector3(0f, 0.6f, 0f);
                 chassis.transform.localScale = new Vector3(2.4f, 0.9f, 3.8f);

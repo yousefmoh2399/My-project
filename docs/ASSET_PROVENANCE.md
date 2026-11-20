@@ -13,7 +13,7 @@ As established in `AGENTS.md` and the project Work Order:
 
 ---
 
-## 2. PHASE 2 ASSET LOG
+## 2. PHASE 2 & 7 ASSET LOG
 
 | Asset Name | Path | Type | Source / Provenance | License | Cost | Notes |
 |---|---|---|---|---|---|---|
@@ -28,8 +28,11 @@ As established in `AGENTS.md` and the project Work Order:
 | **SupplyDepot** | `Assets/KINGWorldWar/Art/Prefabs/Buildings/SupplyDepot.prefab` | 3D Prefab | Procedural Primitives | Proprietary | $0.00 | Silo cluster construction |
 | **RadarStation** | `Assets/KINGWorldWar/Art/Prefabs/Buildings/RadarStation.prefab` | 3D Prefab | Procedural Primitives | Proprietary | $0.00 | Dome and dish construction |
 | **VehicleFactory** | `Assets/KINGWorldWar/Art/Prefabs/Buildings/VehicleFactory.prefab` | 3D Prefab | Procedural Primitives | Proprietary | $0.00 | Industrial hangar construction |
-| **Unit_Tank_Placeholder** | `Assets/KINGWorldWar/Art/Prefabs/Units/Unit_Tank_Placeholder.prefab` | 3D Prefab | Procedural Primitives | Proprietary | $0.00 | Chassis, turret, barrel |
-| **Unit_Aircraft_Placeholder** | `Assets/KINGWorldWar/Art/Prefabs/Units/Unit_Aircraft_Placeholder.prefab` | 3D Prefab | Procedural Primitives | Proprietary | $0.00 | Fuselage, wings, tail fin |
+| **Unit_Tank_Placeholder** | `Assets/KINGWorldWar/Art/Prefabs/Units/Unit_Tank_Placeholder.prefab` | 3D Prefab | Procedural Primitives | Proprietary | $0.00 | Main battle tank: hull, treads, turret, barrel |
+| **Unit_ArmoredVehicle_Placeholder** | `Assets/KINGWorldWar/Art/Prefabs/Units/Unit_ArmoredVehicle_Placeholder.prefab` | 3D Prefab | Procedural Primitives | Proprietary | $0.00 | 6-wheel combat carrier with rapid-fire autocannon |
+| **Unit_Artillery_Placeholder** | `Assets/KINGWorldWar/Art/Prefabs/Units/Unit_Artillery_Placeholder.prefab` | 3D Prefab | Procedural Primitives | Proprietary | $0.00 | Long-range siege howitzer, recoil spades, mount |
+| **Unit_FighterAircraft_Placeholder** | `Assets/KINGWorldWar/Art/Prefabs/Units/Unit_FighterAircraft_Placeholder.prefab` | 3D Prefab | Procedural Primitives | Proprietary | $0.00 | Supersonic delta-wing fighter with twin tail fins |
+| **Unit_ReconAircraft_Placeholder** | `Assets/KINGWorldWar/Art/Prefabs/Units/Unit_ReconAircraft_Placeholder.prefab` | 3D Prefab | Procedural Primitives | Proprietary | $0.00 | High-aspect glider scout UAV with sensor turret |
 | **URP Quality Assets** | `Assets/KINGWorldWar/Art/Settings/URP_Asset_*.asset` | URP Config | Unity URP Template | Unity Companion License | $0.00 | Tuned per quality tier |
 
 ---
@@ -38,4 +41,4 @@ As established in `AGENTS.md` and the project Work Order:
 
 - **Third-Party Paid Assets:** **NONE (0)**
 - **External Free Packages:** **NONE (0)**
-- **All 3D assets in Phase 2 are 100% original, procedural low-poly placeholders built from engine primitives.**
+- **All 3D assets are 100% original, procedural low-poly placeholders built from engine primitives ($0 cost, zero third-party licensing).**

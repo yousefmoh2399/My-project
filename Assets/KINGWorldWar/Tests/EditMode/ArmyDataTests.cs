@@ -30,10 +30,10 @@ namespace KingWorldWar.Tests.EditMode
         }
 
         [Test]
-        public void DefaultArmyConfig_ContainsAllFourArchetypes()
+        public void DefaultArmyConfig_ContainsAllFiveMvpArchetypes()
         {
             var defs = DefaultArmyConfig.CreateDefaultDefinitions();
-            Assert.That(defs.Count, Is.EqualTo(4));
+            Assert.That(defs.Count, Is.EqualTo(5));
 
             var types = new HashSet<UnitType>();
             foreach (var d in defs)
@@ -42,10 +42,11 @@ namespace KingWorldWar.Tests.EditMode
                 d.Validate();
             }
 
-            Assert.That(types.Contains(UnitType.Infantry), Is.True);
-            Assert.That(types.Contains(UnitType.ReconVehicle), Is.True);
             Assert.That(types.Contains(UnitType.Tank), Is.True);
+            Assert.That(types.Contains(UnitType.ArmoredVehicle), Is.True);
             Assert.That(types.Contains(UnitType.Artillery), Is.True);
+            Assert.That(types.Contains(UnitType.FighterAircraft), Is.True);
+            Assert.That(types.Contains(UnitType.ReconAircraft), Is.True);
         }
 
         [Test]
@@ -55,17 +56,20 @@ namespace KingWorldWar.Tests.EditMode
             var dict = new Dictionary<UnitType, UnitDefinition>();
             foreach (var d in defs) dict[d.Type] = d;
 
-            Assert.That(dict[UnitType.Infantry].RequiredBuildingType, Is.EqualTo(BuildingType.Barracks));
-            Assert.That(dict[UnitType.Infantry].RequiredBuildingLevel, Is.EqualTo(1));
-
-            Assert.That(dict[UnitType.ReconVehicle].RequiredBuildingType, Is.EqualTo(BuildingType.Barracks));
-            Assert.That(dict[UnitType.ReconVehicle].RequiredBuildingLevel, Is.EqualTo(2));
-
-            Assert.That(dict[UnitType.Tank].RequiredBuildingType, Is.EqualTo(BuildingType.VehicleFactory));
+            Assert.That(dict[UnitType.Tank].RequiredBuildingType, Is.EqualTo(BuildingType.TankFactory));
             Assert.That(dict[UnitType.Tank].RequiredBuildingLevel, Is.EqualTo(1));
 
-            Assert.That(dict[UnitType.Artillery].RequiredBuildingType, Is.EqualTo(BuildingType.VehicleFactory));
+            Assert.That(dict[UnitType.ArmoredVehicle].RequiredBuildingType, Is.EqualTo(BuildingType.TankFactory));
+            Assert.That(dict[UnitType.ArmoredVehicle].RequiredBuildingLevel, Is.EqualTo(1));
+
+            Assert.That(dict[UnitType.Artillery].RequiredBuildingType, Is.EqualTo(BuildingType.TankFactory));
             Assert.That(dict[UnitType.Artillery].RequiredBuildingLevel, Is.EqualTo(2));
+
+            Assert.That(dict[UnitType.FighterAircraft].RequiredBuildingType, Is.EqualTo(BuildingType.Airfield));
+            Assert.That(dict[UnitType.FighterAircraft].RequiredBuildingLevel, Is.EqualTo(1));
+
+            Assert.That(dict[UnitType.ReconAircraft].RequiredBuildingType, Is.EqualTo(BuildingType.Airfield));
+            Assert.That(dict[UnitType.ReconAircraft].RequiredBuildingLevel, Is.EqualTo(1));
         }
 
         [Test]
@@ -122,25 +126,25 @@ namespace KingWorldWar.Tests.EditMode
             var roster = new ArmyRoster();
             Assert.That(roster.TotalTroops, Is.EqualTo(0));
 
-            roster.AddUnits(UnitType.Infantry, 50);
+            roster.AddUnits(UnitType.ArmoredVehicle, 50);
             roster.AddUnits(UnitType.Tank, 5);
-            Assert.That(roster.GetCount(UnitType.Infantry), Is.EqualTo(50));
+            Assert.That(roster.GetCount(UnitType.ArmoredVehicle), Is.EqualTo(50));
             Assert.That(roster.GetCount(UnitType.Tank), Is.EqualTo(5));
             Assert.That(roster.TotalTroops, Is.EqualTo(55));
 
-            var infPower = config.GetDefinition(UnitType.Infantry).Stats.CombatPower * 50;
+            var avPower = config.GetDefinition(UnitType.ArmoredVehicle).Stats.CombatPower * 50;
             var tankPower = config.GetDefinition(UnitType.Tank).Stats.CombatPower * 5;
-            var expectedTotalPower = infPower + tankPower;
+            var expectedTotalPower = avPower + tankPower;
 
             Assert.That(roster.CalculateTotalCombatPower(config), Is.EqualTo(expectedTotalPower));
 
-            bool removed = roster.TryRemoveUnits(UnitType.Infantry, 20);
+            bool removed = roster.TryRemoveUnits(UnitType.ArmoredVehicle, 20);
             Assert.That(removed, Is.True);
-            Assert.That(roster.GetCount(UnitType.Infantry), Is.EqualTo(30));
+            Assert.That(roster.GetCount(UnitType.ArmoredVehicle), Is.EqualTo(30));
 
-            bool overRemove = roster.TryRemoveUnits(UnitType.Infantry, 100);
+            bool overRemove = roster.TryRemoveUnits(UnitType.ArmoredVehicle, 100);
             Assert.That(overRemove, Is.False);
-            Assert.That(roster.GetCount(UnitType.Infantry), Is.EqualTo(30)); // preserved
+            Assert.That(roster.GetCount(UnitType.ArmoredVehicle), Is.EqualTo(30)); // preserved
         }
     }
 }

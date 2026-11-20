@@ -48,11 +48,11 @@ namespace KingWorldWar.Tests.EditMode
             RecruitmentQueueItem startedItem = null;
             _service.OnRecruitmentStarted += item => startedItem = item;
 
-            var result = await _service.RequestRecruitmentAsync(UnitType.Infantry, 10);
+            var result = await _service.RequestRecruitmentAsync(UnitType.Tank, 10);
 
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Value, Is.Not.Null);
-            Assert.That(result.Value.Type, Is.EqualTo(UnitType.Infantry));
+            Assert.That(result.Value.Type, Is.EqualTo(UnitType.Tank));
             Assert.That(result.Value.Count, Is.EqualTo(10));
             Assert.That(_service.GetActiveQueues().Count, Is.EqualTo(1));
             Assert.That(startedItem, Is.Not.Null);
@@ -62,11 +62,11 @@ namespace KingWorldWar.Tests.EditMode
         [Test]
         public async Task RequestRecruitment_InvalidCount_Fails()
         {
-            var resultZero = await _service.RequestRecruitmentAsync(UnitType.Infantry, 0);
+            var resultZero = await _service.RequestRecruitmentAsync(UnitType.Tank, 0);
             Assert.That(resultZero.IsFailure, Is.True);
             Assert.That(resultZero.Error.Code, Is.EqualTo("INVALID_RECRUIT_COUNT"));
 
-            var resultNegative = await _service.RequestRecruitmentAsync(UnitType.Infantry, -5);
+            var resultNegative = await _service.RequestRecruitmentAsync(UnitType.Tank, -5);
             Assert.That(resultNegative.IsFailure, Is.True);
             Assert.That(resultNegative.Error.Code, Is.EqualTo("INVALID_RECRUIT_COUNT"));
         }
@@ -74,13 +74,13 @@ namespace KingWorldWar.Tests.EditMode
         [Test]
         public async Task RequestRecruitment_ExceedsMaxQueues_Fails()
         {
-            var q1 = await _service.RequestRecruitmentAsync(UnitType.Infantry, 10);
+            var q1 = await _service.RequestRecruitmentAsync(UnitType.Tank, 10);
             Assert.That(q1.IsSuccess, Is.True);
 
-            var q2 = await _service.RequestRecruitmentAsync(UnitType.Tank, 1);
+            var q2 = await _service.RequestRecruitmentAsync(UnitType.ArmoredVehicle, 1);
             Assert.That(q2.IsSuccess, Is.True);
 
-            var q3 = await _service.RequestRecruitmentAsync(UnitType.Infantry, 5);
+            var q3 = await _service.RequestRecruitmentAsync(UnitType.Tank, 5);
             Assert.That(q3.IsFailure, Is.True);
             Assert.That(q3.Error.Code, Is.EqualTo("RECRUITMENT_QUEUE_FULL"));
         }
@@ -88,8 +88,8 @@ namespace KingWorldWar.Tests.EditMode
         [Test]
         public async Task RequestRecruitment_PrerequisiteNotMet_Fails()
         {
-            // Heavy Artillery requires VehicleFactory Level 2.
-            // In initial base repo, Vehicle Factory is Level 1.
+            // Heavy Artillery requires TankFactory Level 2.
+            // In initial base repo, Tank Factory is Level 1.
             var result = await _service.RequestRecruitmentAsync(UnitType.Artillery, 1);
             Assert.That(result.IsFailure, Is.True);
             Assert.That(result.Error.Code, Is.EqualTo("UNIT_PREREQUISITE_NOT_MET"));
@@ -98,18 +98,18 @@ namespace KingWorldWar.Tests.EditMode
         [Test]
         public async Task RequestRecruitment_PrerequisiteSatisfied_Succeeds()
         {
-            // Upgrade Vehicle Factory to Level 2 in baseRepo
+            // Upgrade Tank Factory to Level 2 in baseRepo
             BuildingRuntimeState factory = default;
             foreach (var b in _baseRepo.GetAllBuildings())
             {
-                if (b.Type == BuildingType.VehicleFactory)
+                if (b.Type == BuildingType.TankFactory)
                 {
                     factory = b;
                     break;
                 }
             }
 
-            Assert.That(factory.Id.IsValid, Is.True, "Vehicle Factory should exist in initial base");
+            Assert.That(factory.Id.IsValid, Is.True, "Tank Factory should exist in initial base");
             var upgradedFactory = new BuildingRuntimeState(
                 factory.Id, factory.Type, currentLevel: 2, factory.GridX, factory.GridY);
             _baseRepo.UpdateBuilding(upgradedFactory);
@@ -122,7 +122,7 @@ namespace KingWorldWar.Tests.EditMode
         [Test]
         public async Task CancelRecruitment_Existing_RemovesQueue()
         {
-            var rec = await _service.RequestRecruitmentAsync(UnitType.Infantry, 10);
+            var rec = await _service.RequestRecruitmentAsync(UnitType.Tank, 10);
             Assert.That(rec.IsSuccess, Is.True);
             string queueId = rec.Value.QueueId;
 

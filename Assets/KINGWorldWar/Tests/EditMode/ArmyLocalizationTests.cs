@@ -87,7 +87,35 @@ namespace KingWorldWar.Tests.EditMode
                 "army.drawer.action_cancel",
                 "army.drawer.time_remaining",
                 "army.cancel_dialog.title",
-                "army.cancel_dialog.msg"
+                "army.cancel_dialog.msg",
+                // Phase 7 Categories & Statuses
+                "army.category.ground",
+                "army.category.air",
+                "army.category.all",
+                "army.status.available",
+                "army.status.in_training",
+                "army.status.deployed",
+                // Phase 7 Queue states
+                "army.queue.loading",
+                "army.queue.pending",
+                "army.queue.in_progress",
+                "army.queue.completed",
+                "army.queue.failed",
+                "army.queue.cancelled",
+                "army.queue.refund_notice",
+                // Phase 7 Detail View
+                "army.detail.title",
+                "army.detail.tier",
+                "army.detail.level",
+                "army.detail.category",
+                "army.detail.action_train",
+                "army.detail.action_upgrade",
+                "army.detail.upgrade_cost",
+                "army.detail.upgrade_duration",
+                "army.detail.next_level_benefits",
+                "army.detail.empty",
+                "army.selection.error_exceeds",
+                "army.selection.error_unknown"
             };
 
             foreach (var k in requiredKeys)

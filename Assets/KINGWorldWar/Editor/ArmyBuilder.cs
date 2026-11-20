@@ -198,10 +198,13 @@ namespace KingWorldWar.Editor
             shelfLayout.childForceExpandWidth = true;
             shelfLayout.childForceExpandHeight = true;
 
+            var tankCard = BuildUnitCard(shelfGo.transform, UnitType.Tank);
+            var avCard = BuildUnitCard(shelfGo.transform, UnitType.ArmoredVehicle);
+            var artCard = BuildUnitCard(shelfGo.transform, UnitType.Artillery);
+            var figCard = BuildUnitCard(shelfGo.transform, UnitType.FighterAircraft);
+            var recAirCard = BuildUnitCard(shelfGo.transform, UnitType.ReconAircraft);
             var infCard = BuildUnitCard(shelfGo.transform, UnitType.Infantry);
             var reconCard = BuildUnitCard(shelfGo.transform, UnitType.ReconVehicle);
-            var tankCard = BuildUnitCard(shelfGo.transform, UnitType.Tank);
-            var artCard = BuildUnitCard(shelfGo.transform, UnitType.Artillery);
 
             var so = new SerializedObject(view);
             so.FindProperty("_titleText").objectReferenceValue = titleText;
@@ -211,10 +214,13 @@ namespace KingWorldWar.Editor
             so.FindProperty("_totalTroopsValue").objectReferenceValue = trpsVal;
             so.FindProperty("_recruitmentDrawer").objectReferenceValue = drawer;
 
+            SetCardProperties(so.FindProperty("_tankCard"), tankCard);
+            SetCardProperties(so.FindProperty("_armoredVehicleCard"), avCard);
+            SetCardProperties(so.FindProperty("_artilleryCard"), artCard);
+            SetCardProperties(so.FindProperty("_fighterAircraftCard"), figCard);
+            SetCardProperties(so.FindProperty("_reconAircraftCard"), recAirCard);
             SetCardProperties(so.FindProperty("_infantryCard"), infCard);
             SetCardProperties(so.FindProperty("_reconCard"), reconCard);
-            SetCardProperties(so.FindProperty("_tankCard"), tankCard);
-            SetCardProperties(so.FindProperty("_artilleryCard"), artCard);
 
             so.ApplyModifiedPropertiesWithoutUndo();
             return view;

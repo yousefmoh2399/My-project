@@ -53,6 +53,7 @@ namespace KingWorldWar.App
         [SerializeField] private PlayerArmyView _playerArmyView;
         [SerializeField] private ArmyScreenView _armyScreenView;
         [SerializeField] private RecruitmentDrawer _recruitmentDrawer;
+        [SerializeField] private UnitDetailView _unitDetailView;
 
         [Header("Economy & Resources")]
         [SerializeField] private EconomyDetailDrawer _economyDetailDrawer;
@@ -119,6 +120,12 @@ namespace KingWorldWar.App
         {
             get => _recruitmentDrawer;
             set => _recruitmentDrawer = value;
+        }
+
+        public UnitDetailView UnitDetailView
+        {
+            get => _unitDetailView;
+            set => _unitDetailView = value;
         }
 
         public StrategyCameraRig CameraRig
@@ -197,11 +204,17 @@ namespace KingWorldWar.App
             {
                 var armyConfig = ScriptableObject.CreateInstance<ArmyConfigSO>();
                 armyConfig.InitializeFromDefaults();
-                var armyRepo = new InMemoryArmyStateRepository();
+#if UNITY_EDITOR || DEBUG || UNITY_INCLUDE_TESTS
+                var armyRepo = new LocalMockArmyRepository(armyConfig);
+#else
+                var armyRepo = new LocalMockArmyRepository(armyConfig);
+#endif
+                var legacyRepo = new InMemoryArmyStateRepository();
                 var baseRepo = container.TryResolve<IBaseStateRepository>(out var br) ? br : null;
-                armyService = new ArmyService(armyConfig, armyRepo, baseRepo, log);
+                armyService = new ArmyService(armyConfig, armyRepo, legacyRepo, baseRepo, log);
                 container.Register<IArmyDataSource>(armyConfig);
-                container.Register<IArmyStateRepository>(armyRepo);
+                container.Register<IArmyRepository>(armyRepo);
+                container.Register<IArmyStateRepository>(legacyRepo);
                 container.Register<IArmyService>(armyService);
             }
 
@@ -316,9 +329,14 @@ namespace KingWorldWar.App
                 _recruitmentDrawer.Initialize(armyService, loc, modal);
             }
 
+            if (_unitDetailView != null)
+            {
+                _unitDetailView.Initialize(armyService, loc, type => _recruitmentDrawer?.OpenForUnit(type));
+            }
+
             if (_armyScreenView != null)
             {
-                _armyScreenView.Initialize(armyService, loc, _recruitmentDrawer);
+                _armyScreenView.Initialize(armyService, loc, _recruitmentDrawer, _unitDetailView);
             }
 
             if (_allianceDetailDrawer != null)

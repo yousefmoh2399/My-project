@@ -1,7 +1,7 @@
 # PROJECT STATE — KING WORLD WAR
 
-**Last Updated:** Phase 07 (Alliances & Coalition Systems: Server-Authoritative Design)  
-**Active Branch:** `phase-07/alliances`  
+**Last Updated:** Phase 07 (Army & Training: Server-Authoritative Design)  
+**Active Branch:** `phase-07/army-training`  
 **Engine:** Unity 6 (`6000.6.9f1`)  
 **Active Render Pipeline:** Universal Render Pipeline (URP 17.6.0)
 
@@ -198,7 +198,44 @@
 
 ---
 
-### Phase 07 — Alliances & Coalition Systems (Server-Authoritative Design)
+### Phase 07 — Army & Training (Server-Authoritative Design & 5 MVP Archetypes)
+- **5 MVP Military Unit Archetypes:**
+  - **Ground Operational Category:**
+    * Main Battle Tank (`unit_tank`): Heavy assault armor, high frontal protection, built in Tank Factory (Level 1).
+    * Armored Vehicle (`unit_armored_vehicle`): Mechanized support carrier with rapid-fire autocannon, built in Tank Factory (Level 1).
+    * Heavy Artillery (`unit_artillery`): Long-range siege howitzer delivering area bombardment, built in Tank Factory (Level 2).
+  - **Air Operational Category:**
+    * Fighter Aircraft (`unit_fighter_aircraft`): Supersonic tactical interceptor providing air superiority, built in Airfield (Level 1).
+    * Recon Aircraft (`unit_recon_aircraft`): Strategic high-altitude scout UAV unveiling fog of war, built in Airfield (Level 1).
+  - Naval units strictly postponed per MVP scope.
+- **Stat Classification & Authority Model:**
+  - Strict tagging: `ServerAuthoritative` (Health, Attack, Defense, Speed, Range, CapacityWeight, CombatPower, Cost, Requirements, Tier, UpgradeCosts, UpgradeDuration) vs `DisplayOnly` (NameKey, DescKey, RoleKey, IconAssetPath, ModelAssetPath, NextLevelBenefitsKey).
+- **Authoritative Roster Snapshot (`ArmyRosterSnapshot`):**
+  - Immutable server-authoritative snapshot providing status counts: `TotalOwned`, `InTraining`, `Deployed`, and calculated `Available`.
+  - Concurrency revision tracking and balance versioning (`balanceVersion`).
+- **Unit Selection Model (`UnitSelection`):**
+  - Reusable military force selection for deployment.
+  - Strictly validates against available reserves in authoritative snapshot (rejects negative, empty, or over-reserve requests).
+  - Pure DTO output (`BattleDeploymentRequestDto`) with zero client-side battle simulation logic.
+- **Development Mock Repository (`LocalMockArmyRepository`):**
+  - Guarded behind `#if UNITY_EDITOR || DEBUG || UNITY_INCLUDE_TESTS`.
+  - Simulates server-authoritative costs, durations, queue concurrency limits (max 2), UUIDv4 request idempotency caching, latency, and simulated failure scenarios.
+- **Server Contract Specification (`docs/api/army-contract.md`):**
+  - Protocol Version 1.0.0 for Nakama RPCs and PostgreSQL persistence.
+  - Endpoints: `kww.army.get_roster`, `kww.army.train.request`, `kww.army.train.cancel`, `kww.army.upgrade.request`.
+  - PostgreSQL schema for `player_units`, `training_queues`, and `idempotency_records`.
+  - Server-defined 50% refund policy on cancellation and offline queue progress reconciliation.
+- **UI & 3D Staging Ground:**
+  - `ArmyScreenView`: Categorized grid supporting Ground and Air units, category filtering tabs (All, Ground, Air), status breakdowns (`Available`, `InTraining`, `Deployed`), and empty/loading states.
+  - `UnitDetailView`: Full specification drawer, stat authority presentation, next-level research perks, and smooth 3D preview stage rotation.
+  - `TrainingQueueItemView`: Granular state badges (`Loading`, `Pending`, `InProgress`, `Completed`, `Failed`, `Cancelled`), live server timestamp countdowns, and cancellation with refund notice modal.
+  - `UnitPrefabGenerator`: Automated generation of 5 original, procedural low-poly unit prefabs ($0 cost, 100% original geometry) in `Assets/KINGWorldWar/Art/Prefabs/Units/`.
+- **Bilingual Military Localization:**
+  - 100% key parity in Arabic RTL and English for all 5 units, category filters, status labels, queue states, and specification drawers in `DefaultStringTables.cs`.
+- **Automated Test Coverage:**
+  - **185 EditMode tests** (including 5 new `ArmyDefinitionValidationTests`, 5 new `UnitSelectionTests`, 3 new `TrainingQueueStateMachineTests`, 6 new `ArmyRepositoryTests`, and updated `ArmyLocalizationTests` & `ArmyServiceTests`).
+  - **62 PlayMode tests** (including 4 new `ArmyRosterAndTrainingUITests` and updated `ArmyInteractionTests`).
+  - **247 total automated tests across all suites (100% pass rate, 0 failed, 0 errors, 0 warnings).**
 - **Role Hierarchy & Permission Model (`KingWorldWar.Core.Alliance`):**
   - Roles: `Leader = 1`, `Officer = 2`, `Veteran = 3`, `Member = 4`, `Recruit = 5`.
   - Strict hierarchical permission matrix:

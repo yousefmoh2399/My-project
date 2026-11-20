@@ -146,13 +146,14 @@ namespace KingWorldWar.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator PlayerArmyView_SpawnsAllFourArchetypes()
+        public IEnumerator PlayerArmyView_SpawnsAllFiveMvpArchetypes()
         {
-            Assert.That(_armyView.UnitViews.Count, Is.EqualTo(4));
-            Assert.That(_armyView.UnitViews.ContainsKey(UnitType.Infantry), Is.True);
-            Assert.That(_armyView.UnitViews.ContainsKey(UnitType.ReconVehicle), Is.True);
+            Assert.That(_armyView.UnitViews.Count, Is.EqualTo(5));
             Assert.That(_armyView.UnitViews.ContainsKey(UnitType.Tank), Is.True);
+            Assert.That(_armyView.UnitViews.ContainsKey(UnitType.ArmoredVehicle), Is.True);
             Assert.That(_armyView.UnitViews.ContainsKey(UnitType.Artillery), Is.True);
+            Assert.That(_armyView.UnitViews.ContainsKey(UnitType.FighterAircraft), Is.True);
+            Assert.That(_armyView.UnitViews.ContainsKey(UnitType.ReconAircraft), Is.True);
             yield return null;
         }
 
@@ -178,7 +179,7 @@ namespace KingWorldWar.Tests.PlayMode
         [UnityTest]
         public IEnumerator PlayerArmyView_Deselect_ClearsSelection()
         {
-            _armyView.SelectUnit(UnitType.Infantry);
+            _armyView.SelectUnit(UnitType.ArmoredVehicle);
             yield return null;
             Assert.That(_armyView.SelectedView, Is.Not.Null);
 
@@ -204,7 +205,7 @@ namespace KingWorldWar.Tests.PlayMode
         [UnityTest]
         public IEnumerator PlayerArmyView_RaycastEmpty_Deselects()
         {
-            _armyView.SelectUnit(UnitType.Infantry);
+            _armyView.SelectUnit(UnitType.ArmoredVehicle);
             yield return null;
             Assert.That(_armyView.SelectedView, Is.Not.Null);
 
@@ -280,7 +281,7 @@ namespace KingWorldWar.Tests.PlayMode
         [UnityTest]
         public IEnumerator RecruitmentDrawer_CloseButton_HidesDrawer()
         {
-            _drawer.OpenForUnit(UnitType.Infantry);
+            _drawer.OpenForUnit(UnitType.ArmoredVehicle);
             yield return null;
             Assert.That(_drawer.IsVisible, Is.True);
 

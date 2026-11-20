@@ -331,7 +331,8 @@ namespace KingWorldWar.UI.Army
 
             if (_btnRecruit != null)
             {
-                bool canRecruit = prereqMet && !isTraining && (activeQueues.Count < _armyService.StateRepository.MaxConcurrentQueues);
+                int maxQueues = _armyService.MaxConcurrentQueues;
+                bool canRecruit = prereqMet && !isTraining && (activeQueues.Count < maxQueues);
                 _btnRecruit.gameObject.SetActive(!isTraining);
                 _btnRecruit.interactable = canRecruit;
             }

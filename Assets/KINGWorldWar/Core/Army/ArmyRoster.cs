@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace KingWorldWar.Core.Army
 {
@@ -85,5 +86,24 @@ namespace KingWorldWar.Core.Army
         }
 
         public ArmyRoster Clone() => new ArmyRoster(_counts);
+
+        public static ArmyRoster FromSnapshot(ArmyRosterSnapshot snapshot)
+        {
+            if (snapshot == null) return new ArmyRoster();
+            return new ArmyRoster(snapshot.TotalOwned.ToDictionary(k => k.Key, v => v.Value));
+        }
+
+        public ArmyRosterSnapshot ToSnapshot(string playerId = "player_default", long revision = 1, string balanceVersion = "1.0.0")
+        {
+            return new ArmyRosterSnapshot(
+                playerId,
+                revision,
+                balanceVersion,
+                DateTime.UtcNow,
+                _counts,
+                new Dictionary<UnitType, int>(),
+                new Dictionary<UnitType, int>()
+            );
+        }
     }
 }

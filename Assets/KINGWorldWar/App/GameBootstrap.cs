@@ -156,11 +156,17 @@ namespace KingWorldWar.App
 
             var armyConfig = ScriptableObject.CreateInstance<ArmyConfigSO>();
             armyConfig.InitializeFromDefaults();
-            var armyRepo = new InMemoryArmyStateRepository();
-            var armyService = new ArmyService(armyConfig, armyRepo, baseRepo, log);
+#if UNITY_EDITOR || DEBUG || UNITY_INCLUDE_TESTS
+            var armyRepo = new LocalMockArmyRepository(armyConfig);
+#else
+            var armyRepo = new LocalMockArmyRepository(armyConfig);
+#endif
+            var legacyArmyRepo = new InMemoryArmyStateRepository();
+            var armyService = new ArmyService(armyConfig, armyRepo, legacyArmyRepo, baseRepo, log);
 
             container.Register<IArmyDataSource>(armyConfig);
-            container.Register<IArmyStateRepository>(armyRepo);
+            container.Register<IArmyRepository>(armyRepo);
+            container.Register<IArmyStateRepository>(legacyArmyRepo);
             container.Register<IArmyService>(armyService);
 
             var economyConfig = ScriptableObject.CreateInstance<EconomyConfigSO>();
