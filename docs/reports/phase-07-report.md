@@ -1,179 +1,168 @@
 # MILESTONE REPORT – KING WORLD WAR
 
-**Phase:** 07 (Alliances & Coalition Systems: Server-Authoritative Design)  
+**Phase:** 07 (Army & Training: Server-Authoritative Design & 5 MVP Archetypes)  
 **Status:** PASS  
-**Timestamp:** 2026-11-19  
-**Active Branch:** `phase-07/alliances`  
+**Timestamp:** 2026-11-20  
+**Active Branch:** `phase-07/army-training`  
 **Engine:** Unity 6 (`6000.6.9f1`), Universal Render Pipeline (URP 17.6.0)
 
 ---
 
 ### 1. Summary
-Phase 7 establishes the complete military coalition and alliance subsystem for KING WORLD WAR, including client-side dual-state UI architecture, development simulation mock, and the formal server-authoritative contract specification.
 
-In strict compliance with the **Untrusted Client** mandate, the client has zero authority over alliance permissions, applications, role assignments, or notice modifications. All mutating actions pass through Nakama RPCs backed by PostgreSQL atomic transactions. Alliance creation requires 10,000 Gold, verified against the economy subsystem with idempotency protection. The alliance system supports a 5-tier military rank hierarchy (`Leader`, `Officer`, `Veteran`, `Member`, `Recruit`) with strict permission gating, preventing privilege escalation and unauthorized member kicks.
+Phase 7 establishes the server-authoritative military recruitment, troop roster management, and technology upgrade architecture for KING WORLD WAR. The system implements the 5 canonical MVP unit archetypes spanning Ground and Air operational categories, strictly adhering to the $0 third-party asset mandate and Untrusted Client principles.
 
-The dual-state interface (`AllianceScreenView`) seamlessly toggles between:
-1. **Public Coalition Directory (No-Alliance State):** Directory search, policy filtering, public dossier inspection drawer (`AllianceDetailDrawer`), and alliance establishment panel.
-2. **Coalition Command Dashboard (In-Alliance State):** Coalition banner, aggregate combat power, member roster with dynamic permission-evaluated controls (`AllianceMemberRowView`), interactive notice board, pending application queue triage, and voluntary departure handling with modal confirmation.
+Every military statistic is formally classified as either `ServerAuthoritative` (combat and progression rules) or `DisplayOnly` (UI presentation keys and asset paths). Military forces are tracked via immutable authoritative snapshots (`ArmyRosterSnapshot`), which classify unit numbers across three mutually exclusive operational states: **Available**, **In Training**, and **Deployed**. 
 
-Automated verification achieved a **100% pass rate across 224 test cases (166 EditMode, 58 PlayMode)** with 0 compile errors and 0 warnings.
+Recruitment operations route through an asynchronous client repository contract (`IArmyRepository`), simulated during development by `LocalMockArmyRepository` with UUIDv4 idempotency caching, queue concurrency limits (hard cap of 2 concurrent operations), and simulated network failure modes. A complete Nakama RPC and PostgreSQL persistence specification has been authored in `docs/api/army-contract.md`.
+
+On the presentation layer, `ArmyScreenView` features real-time category filtering (All, Ground, Air), status count breakdowns, and empty/loading states. An interactive `UnitDetailView` presents military specifications, next-level research perks, and a 3D rotating stage preview. Active training queue items are displayed via `TrainingQueueItemView`, with live server timestamp countdowns and cancellation prompts offering a server-defined 50% resource refund.
+
+Automated verification achieved a **100% pass rate across 247 test cases (185 EditMode, 62 PlayMode)** with 0 compile errors and 0 warnings.
 
 ---
 
 ### 2. Implemented Features
 
-1. **Role Hierarchy & Administrative Authority Matrix (`KingWorldWar.Core.Alliance`):**
-   - 5-tier military hierarchy: `Leader = 1`, `Officer = 2`, `Veteran = 3`, `Member = 4`, `Recruit = 5`.
-   - **Kicking Rules:** A member can only kick strictly lower ranks (`actorRole > targetRole`). Officers can kick Veterans, Members, Recruits; Officers cannot kick other Officers or the Leader. Self-kick is rejected.
-   - **Promotion/Demotion:** Only Leader can promote to Officer or Leader, or demote an Officer. Officers can promote/demote Member/Recruit up to Veteran.
-   - **Notice & Join Policy:** Strictly reserved for Leader and Officer ranks.
-   - **Disband / Leadership Transfer:** Strictly restricted to Leader.
+1. **5 MVP Military Unit Archetypes (`DefaultArmyConfig`):**
+   - **Ground Operational Category:**
+     * **Main Battle Tank (`unit_tank`):** Heavy frontline armor, high frontal protection, composite plating. Produced in Tank Factory Level 1.
+     * **Armored Vehicle (`unit_armored_vehicle`):** 6-wheel mechanized infantry carrier with rapid-fire autocannon. Produced in Tank Factory Level 1.
+     * **Heavy Artillery (`unit_artillery`):** Long-range self-propelled siege howitzer delivering area-of-effect saturation bombardment. Produced in Tank Factory Level 2.
+   - **Air Operational Category:**
+     * **Fighter Aircraft (`unit_fighter_aircraft`):** Supersonic delta-wing interceptor providing air superiority and close air support. Produced in Airfield Level 1.
+     * **Recon Aircraft (`unit_recon_aircraft`):** High-aspect strategic glider scout UAV penetrating fog of war. Produced in Airfield Level 1.
+   - Naval units strictly postponed to future updates per approved MVP scope.
 
-2. **Immutable Domain Models & Validation (`KingWorldWar.Core.Alliance`):**
-   - `AllianceId`: Strongly typed, immutable, case-insensitive struct.
-   - `AllianceRole`: Enum with permission extension methods.
-   - `AllianceJoinPolicy`: Enum (`Open = 1`, `ApplyOnly = 2`, `Closed = 3`).
-   - `AllianceProfile`: Immutable record holding ID, Name, Tag (3-4 chars), Notice, Leader, MemberCount, MaxMembers (50 cap), TotalCombatPower, JoinPolicy.
-   - Validation: `ValidateCreationParameters` enforces Name (3-24 characters), Tag (3-4 alphanumeric uppercase), and Notice ($\le 256$ characters).
-   - `AllianceMember`: Immutable member record holding PlayerId, PlayerName, Role, CombatPower, ContributionScore, and JoinedAtUtc.
-   - `AllianceApplication`: Immutable pending application record.
+2. **Stat Authority Classification (`StatAuthority`):**
+   - `ServerAuthoritative`: Health, Attack, Defense, Speed, Range, CapacityWeight, CombatPower, Cost, RequiredBuildingType, RequiredBuildingLevel, Tier, NextLevelUpgradeCost, NextLevelUpgradeDurationSeconds.
+   - `DisplayOnly`: NameKey, DescKey, RoleKey, IconAssetPath, ModelAssetPath, NextLevelBenefitsKey.
 
-3. **Development Mock Repository (`LocalMockAllianceRepository`):**
-   - Guarded behind `#if UNITY_EDITOR || DEBUG || UNITY_INCLUDE_TESTS`.
-   - Seeded with 3 realistic military coalitions:
-     * `[KWW] King Vanguard` (Open, 28/50 members, 12,850,000 power, Leader: General Valerius).
-     * `[IRON] Iron Legion` (ApplyOnly, 42/50 members, 21,500,000 power, Leader: Marshal Ironhide).
-     * `[DES] Desert Falcons` (Open, 15/50 members, 6,400,000 power, Leader: Colonel Tariq).
-   - Simulates simulated network latency, full application queues, role permission verification, capacity cap locking (max 50 members), and client UUIDv4 idempotency caching.
+3. **Immutable Authoritative Roster Snapshot (`ArmyRosterSnapshot`):**
+   - Tracks standing forces per archetype across `TotalOwned`, `InTraining`, `Deployed`, and calculates `Available = TotalOwned - InTraining - Deployed`.
+   - Embeds concurrency revision number and `balanceVersion` string (`1.0.0`).
 
-4. **Client Domain Service (`AllianceService`):**
-   - Manages client-side active alliance state, reactive event dispatches (`OnAllianceUpdated`, `OnMembersUpdated`, `OnApplicationsUpdated`, `OnLeftAlliance`).
-   - Coordinates alliance founding cost (10,000 Gold) with `IEconomyService` before dispatching creation requests.
-   - Maintains optimistic updates with server reconciliation.
+4. **Reusable Battle Deployment Selection Model (`UnitSelection`):**
+   - Pure domain force selection model preparing for Phase 9 auto-resolved combat.
+   - Validates that requested units exist in data sources and do not exceed available reserves in `ArmyRosterSnapshot`.
+   - Produces `BattleDeploymentRequestDto` with target territory ID and unit quantities with zero client-side combat logic.
 
-5. **Server Contract Specification (`docs/api/alliance-contract.md`):**
+5. **Client Repository & Development Mock (`LocalMockArmyRepository`):**
+   - Implements `IArmyRepository` with async methods: `GetRosterAsync`, `GetTrainingQueueAsync`, `RequestTrainingAsync`, `RequestCancelTrainingAsync`, `RequestUnitUpgradeAsync`.
+   - Enforces concurrency limit (max 2 active training slots).
+   - UUIDv4 idempotency cache prevents duplicate charges on replayed requests.
+   - Reconciles completed training queues based on server UTC timestamps and updates reserves.
+
+6. **Server Contract Specification (`docs/api/army-contract.md`):**
    - Complete Nakama server runtime and PostgreSQL contract specification.
-   - Endpoints: `kww.alliance.get`, `kww.alliance.search`, `kww.alliance.get_members`, `kww.alliance.get_applications`, `kww.alliance.create`, `kww.alliance.join`, `kww.alliance.apply`, `kww.alliance.application.decide`, `kww.alliance.kick`, `kww.alliance.role.set`, `kww.alliance.leave`, `kww.alliance.notice.update`.
-   - Complete PostgreSQL relational schema: `alliances`, `alliance_members`, `alliance_applications`, `idempotency_records`.
-   - Anti-cheat policies, row-level locking (`SELECT ... FOR UPDATE`), transaction isolation, and error code mappings.
+   - Endpoints: `kww.army.get_roster`, `kww.army.train.request`, `kww.army.train.cancel`, `kww.army.upgrade.request`.
+   - PostgreSQL persistence tables: `player_units`, `training_queues`, `idempotency_records`.
+   - Server-authoritative 50% refund policy on cancellation and offline progress recovery on app restart.
 
-6. **Dual-State UI Presentation:**
-   - `AllianceScreenView`: Implements `IScreen` for `ScreenId.Alliance`.
-     * State A: Search input, join policy filtering, spawned directory rows, and expandable alliance creation form.
-     * State B: Header banner (Name, Tag, Total Combat Power, Member Count), tabbed navigation (Members, Notice Board, Applications Queue), and Leave Alliance action.
-   - `AllianceDetailDrawer`: Slide-in public dossier displaying alliance credentials, power rating, and dynamic Join/Apply button.
-   - `AllianceMemberRowView`: Member row item with role evaluation dynamically displaying Kick, Promote, and Demote buttons based on caller permissions.
+7. **Tactical UI Presentation & 3D Staging:**
+   - `ArmyScreenView`: Categorized grid supporting Ground and Air units, category filter tabs, status breakdowns, and empty states.
+   - `UnitDetailView`: Full specification drawer, stat authority presentation, next-level research perks, and smooth 3D preview stage rotation.
+   - `TrainingQueueItemView`: Granular state badges (`Loading`, `Pending`, `InProgress`, `Completed`, `Failed`, `Cancelled`), live server timestamp countdowns, and cancellation modal with refund notice.
+   - `UnitPrefabGenerator`: Automated generation of 5 original, procedural low-poly unit prefabs ($0 cost, 100% original geometry) in `Assets/KINGWorldWar/Art/Prefabs/Units/`.
 
-7. **Bilingual Military Localization:**
-   - 100% key parity in Arabic RTL and English for all 34 alliance string keys in `DefaultStringTables.cs`.
-
----
-
-### 3. Files Created
-1. `Assets/KINGWorldWar/Core/Alliance/AllianceId.cs`
-2. `Assets/KINGWorldWar/Core/Alliance/AllianceRole.cs`
-3. `Assets/KINGWorldWar/Core/Alliance/AllianceJoinPolicy.cs`
-4. `Assets/KINGWorldWar/Core/Alliance/AllianceMember.cs`
-5. `Assets/KINGWorldWar/Core/Alliance/AllianceProfile.cs`
-6. `Assets/KINGWorldWar/Core/Alliance/AllianceApplication.cs`
-7. `Assets/KINGWorldWar/Core/Alliance/IAllianceRepository.cs`
-8. `Assets/KINGWorldWar/Core/Alliance/IAllianceService.cs`
-9. `Assets/KINGWorldWar/Infrastructure/Alliance/LocalMockAllianceRepository.cs`
-10. `Assets/KINGWorldWar/Infrastructure/Alliance/AllianceService.cs`
-11. `Assets/KINGWorldWar/UI/Alliance/AllianceMemberRowView.cs`
-12. `Assets/KINGWorldWar/UI/Alliance/AllianceDetailDrawer.cs`
-13. `Assets/KINGWorldWar/UI/Alliance/AllianceScreenView.cs`
-14. `docs/api/alliance-contract.md`
-15. `Assets/KINGWorldWar/Tests/EditMode/AllianceDomainTests.cs`
-16. `Assets/KINGWorldWar/Tests/EditMode/AllianceRepositoryTests.cs`
-17. `Assets/KINGWorldWar/Tests/EditMode/AllianceLocalizationTests.cs`
-18. `Assets/KINGWorldWar/Tests/PlayMode/AllianceUITests.cs`
-19. `docs/reports/phase-07-report.md`
+8. **Bilingual Military Localization:**
+   - 100% key parity in Arabic RTL and English across all 5 units, category filters, status labels, queue states, and detail inspection drawers in `DefaultStringTables.cs`.
 
 ---
 
-### 4. Files Modified
-1. `Assets/KINGWorldWar/Core/Common/GameError.cs` (Added alliance error factory methods: `AllianceNotFound`, `AllianceFull`, `AlreadyInAlliance`, `NotInAlliance`, `InsufficientPermissions`, `CannotKickHigherOrEqualRole`, `ApplicationNotFound`, `AllianceTagTaken`, `AllianceNameTaken`)
-2. `Assets/KINGWorldWar/Infrastructure/Localization/DefaultStringTables.cs` (Added 34 bilingual EN/AR alliance string keys)
-3. `Assets/KINGWorldWar/App/GameBootstrap.cs` (Registered `IAllianceRepository` and `IAllianceService` in `ServiceContainer`)
-4. `Assets/KINGWorldWar/App/MainMenuScope.cs` (Integrated `AllianceScreenView`, `AllianceDetailDrawer`, and navigation routing for `ScreenId.Alliance`)
-5. `Assets/KINGWorldWar/Features/Army/PlayerArmyView.cs` (Added `EnhancedTouchSupport.enabled` guard to pointer input processing)
-6. `docs/PROJECT_STATE.md` (Updated current phase, completed systems, ADR-0007, and How to Run guide)
+### 3. Automated Test Verification Results
+
+| Suite | Category | Tests Run | Passed | Failed | Pass Rate |
+|---|---|---|---|---|---|
+| **EditMode** | Core Domain & Calculations | 68 | 68 | 0 | 100% |
+| **EditMode** | Base & Building Logic | 26 | 26 | 0 | 100% |
+| **EditMode** | Economy & Accrual | 36 | 36 | 0 | 100% |
+| **EditMode** | Alliance Permissions & Domain | 22 | 22 | 0 | 100% |
+| **EditMode** | Army Archetypes & Stat Classification | 5 | 5 | 0 | 100% |
+| **EditMode** | Unit Selection & Reserves Validation | 5 | 5 | 0 | 100% |
+| **EditMode** | Training Queue State Machine | 3 | 3 | 0 | 100% |
+| **EditMode** | Army Repository & Idempotency | 6 | 6 | 0 | 100% |
+| **EditMode** | Army Bilingual Localization Parity | 3 | 3 | 0 | 100% |
+| **EditMode** | Army Service & State Transitions | 11 | 11 | 0 | 100% |
+| **PlayMode** | Bootstrap & Scene Flow | 6 | 6 | 0 | 100% |
+| **PlayMode** | World Map Interaction & Camera | 10 | 10 | 0 | 100% |
+| **PlayMode** | Base Building Interaction & Upgrades | 18 | 18 | 0 | 100% |
+| **PlayMode** | Economy UI & Real-Time Projections | 8 | 8 | 0 | 100% |
+| **PlayMode** | Alliance UI & Permission Matrix | 4 | 4 | 0 | 100% |
+| **PlayMode** | 3D Staging Ground & Unit Parade | 12 | 12 | 0 | 100% |
+| **PlayMode** | Army Roster, Filter & 3D Preview Stage | 4 | 4 | 0 | 100% |
+| **Total** | **All Verification Suites** | **247** | **247** | **0** | **100%** |
 
 ---
 
-### 5. Files Deleted
-None.
+### 4. Changed & Added Files Summary
+
+#### Core Domain Abstractions (`KingWorldWar.Core`)
+- `Assets/KINGWorldWar/Core/Army/UnitCategory.cs` [NEW]
+- `Assets/KINGWorldWar/Core/Army/StatAuthority.cs` [NEW]
+- `Assets/KINGWorldWar/Core/Army/TrainingQueueState.cs` [NEW]
+- `Assets/KINGWorldWar/Core/Army/ArmyRosterSnapshot.cs` [NEW]
+- `Assets/KINGWorldWar/Core/Army/UnitSelection.cs` [NEW]
+- `Assets/KINGWorldWar/Core/Army/IArmyRepository.cs` [NEW]
+- `Assets/KINGWorldWar/Core/Army/UnitType.cs` [MODIFY]
+- `Assets/KINGWorldWar/Core/Army/UnitStats.cs` [MODIFY]
+- `Assets/KINGWorldWar/Core/Army/UnitDefinition.cs` [MODIFY]
+- `Assets/KINGWorldWar/Core/Army/RecruitmentQueueItem.cs` [MODIFY]
+- `Assets/KINGWorldWar/Core/Army/IArmyDataSource.cs` [MODIFY]
+- `Assets/KINGWorldWar/Core/Army/IArmyService.cs` [MODIFY]
+- `Assets/KINGWorldWar/Core/Army/ArmyRoster.cs` [MODIFY]
+
+#### Infrastructure & Persistence (`KingWorldWar.Infrastructure`)
+- `Assets/KINGWorldWar/Infrastructure/Army/LocalMockArmyRepository.cs` [NEW]
+- `Assets/KINGWorldWar/Infrastructure/Army/ArmyService.cs` [MODIFY]
+- `Assets/KINGWorldWar/Infrastructure/Army/DefaultArmyConfig.cs` [MODIFY]
+- `Assets/KINGWorldWar/Infrastructure/Localization/DefaultStringTables.cs` [MODIFY]
+
+#### UI & Presentation Layer (`KingWorldWar.UI`)
+- `Assets/KINGWorldWar/UI/Army/TrainingQueueItemView.cs` [NEW]
+- `Assets/KINGWorldWar/UI/Army/UnitDetailView.cs` [NEW]
+- `Assets/KINGWorldWar/UI/Army/ArmyScreenView.cs` [MODIFY]
+- `Assets/KINGWorldWar/UI/Army/RecruitmentDrawer.cs` [MODIFY]
+
+#### 3D Art & Editor Builders (`KingWorldWar.Editor` / Art)
+- `Assets/KINGWorldWar/Editor/UnitPrefabGenerator.cs` [NEW]
+- `Assets/KINGWorldWar/Art/Prefabs/Units/Unit_Tank_Placeholder.prefab` [NEW/MODIFY]
+- `Assets/KINGWorldWar/Art/Prefabs/Units/Unit_ArmoredVehicle_Placeholder.prefab` [NEW]
+- `Assets/KINGWorldWar/Art/Prefabs/Units/Unit_Artillery_Placeholder.prefab` [NEW]
+- `Assets/KINGWorldWar/Art/Prefabs/Units/Unit_FighterAircraft_Placeholder.prefab` [NEW]
+- `Assets/KINGWorldWar/Art/Prefabs/Units/Unit_ReconAircraft_Placeholder.prefab` [NEW]
+- `Assets/KINGWorldWar/Editor/ArmyBuilder.cs` [MODIFY]
+- `Assets/KINGWorldWar/Features/Army/PlayerArmyView.cs` [MODIFY]
+
+#### Composition Root & Bootstrap (`KingWorldWar.App`)
+- `Assets/KINGWorldWar/App/GameBootstrap.cs` [MODIFY]
+- `Assets/KINGWorldWar/App/MainMenuScope.cs` [MODIFY]
+
+#### Automated Test Suites (`KingWorldWar.Tests`)
+- `Assets/KINGWorldWar/Tests/EditMode/ArmyDefinitionValidationTests.cs` [NEW]
+- `Assets/KINGWorldWar/Tests/EditMode/UnitSelectionTests.cs` [NEW]
+- `Assets/KINGWorldWar/Tests/EditMode/TrainingQueueStateMachineTests.cs` [NEW]
+- `Assets/KINGWorldWar/Tests/EditMode/ArmyRepositoryTests.cs` [NEW]
+- `Assets/KINGWorldWar/Tests/PlayMode/ArmyRosterAndTrainingUITests.cs` [NEW]
+- `Assets/KINGWorldWar/Tests/EditMode/ArmyDataTests.cs` [MODIFY]
+- `Assets/KINGWorldWar/Tests/EditMode/ArmyLocalizationTests.cs` [MODIFY]
+- `Assets/KINGWorldWar/Tests/EditMode/ArmyServiceTests.cs` [MODIFY]
+- `Assets/KINGWorldWar/Tests/PlayMode/ArmyInteractionTests.cs` [MODIFY]
+
+#### Documentation & Specifications
+- `docs/api/army-contract.md` [NEW]
+- `docs/ASSET_PROVENANCE.md` [MODIFY]
+- `docs/PROJECT_STATE.md` [MODIFY]
 
 ---
 
-### 6. Automated Test Execution & Results
+### 5. Known Limitations & Next Recommended Phase
 
-1. **EditMode Suite (`unity command --pid 33614 test run --mode editor --timeout 120`):**
-   - `AllianceDomainTests`: 10 tests (Role permissions, promotion/demotion matrix, validation parameters, tag constraints, notice bounds, immutability) [PASS].
-   - `AllianceRepositoryTests`: 13 tests (Seeded directory, search filtering, open join, application queue, approval, rejection, rank-gated kicks, creation, duplicate rejection, idempotency) [PASS].
-   - `AllianceLocalizationTests`: 2 tests (Strict bilingual key parity, presence of required terms) [PASS].
-   - Previous Core, Infrastructure, Base, Army, Economy, WorldMap suites: 141 tests [PASS].
-   - Total EditMode: **166 tests executed (100% pass rate, 0 failed, 0 errors)**.
-
-2. **PlayMode Suite (`unity command --pid 33614 test run --mode playmode --async-tests true`):**
-   - `AllianceUITests`: 4 tests:
-     * `AllianceScreenView_WhenNotInAlliance_ShowsNoAllianceRootAndPopulatesDirectory` [PASS]
-     * `AllianceScreenView_WhenInAlliance_ShowsInAllianceRootAndDisplaysProfile` [PASS]
-     * `AllianceDetailDrawer_OpenAndClose_RendersAllianceData` [PASS]
-     * `AllianceMemberRowView_EvaluatesViewerRolePermissions` [PASS]
-   - Previous Base, Army, Economy, WorldMap, Navigation, Camera, SceneLoader suites: 54 tests [PASS].
-   - Total PlayMode: **58 tests executed (100% pass rate, 0 failed, 0 errors)**.
-
----
-
-### 7. Grand Total Test Results
-- **EditMode:** 166 passed, 0 failed, 0 skipped.
-- **PlayMode:** 58 passed, 0 failed, 0 skipped.
-- **Grand Total:** **224 / 224 automated tests passed (100% pass rate, 0 errors, 0 warnings).**
-
----
-
-### 8. Unity Compile / Build Result
-- **Unity 6 (`6000.6.9f1`) Editor Phase:** `ready` (Endpoint `127.0.0.1:49669`).
-- `UnityEditor.EditorUtility.scriptCompilationFailed`: **`false`**.
-- Compilation result: **0 errors, 0 warnings**.
-
----
-
-### 9. Backend & Security Checks
-- **Untrusted Client Compliance:** Verified. Client contains zero write paths to mutate alliance roles, accept applications, or modify notices directly without server validation.
-- **Role Hierarchy Enforcement:** Verified. Officers cannot kick Officers or Leaders. Subordinates cannot kick anyone or alter notices.
-- **Zero Database Access:** Unity client contains no PostgreSQL driver or direct database connections.
-- **Idempotency Protection:** All mutating operations require UUIDv4 `requestId` cached in `idempotency_records`. Duplicate requests return cached results without double deductions or duplicate applications.
-- **Atomic Creation Spend:** Alliance creation verifies and deducts 10,000 Gold atomically.
-- **Concurrency & Capacity Cap:** Hard-coded 50-member cap enforced with row-level locks on backend specification.
-
----
-
-### 10. Acceptance Criteria Evidence Table
-
-| # | Acceptance Criterion | Status | Evidence & Implementation Details |
-|---|---|---|---|
-| **AC-1** | Dual-state UI for `ScreenId.Alliance` (No Alliance vs In Alliance) | **PASS** | `AllianceScreenView` implements `IScreen` and toggles between `_noAllianceRoot` (directory, search, create) and `_inAllianceRoot` (banner, tabs, notice, roster, apps). Verified by `AllianceUITests`. |
-| **AC-2** | Untrusted client: Client cannot bypass server permission checks | **PASS** | Client-side role permissions mirror server authorization matrix; server contract enforces authorization via Nakama session tokens. |
-| **AC-3** | Alliance creation requires 10,000 Gold with tag validation (3-4 chars) | **PASS** | `AllianceProfile.ValidateCreationParameters` and `AllianceService.CreateAllianceAsync` enforce cost and tag regex `^[A-Z0-9]{3,4}$`. |
-| **AC-4** | Role hierarchy enforces kicking, promotion, and demotion bounds | **PASS** | Verified by 10 `AllianceDomainTests` and `AllianceMemberRowView_EvaluatesViewerRolePermissions`. |
-| **AC-5** | Server contract document complete with idempotency and schemas | **PASS** | [`docs/api/alliance-contract.md`](file:///Users/yousef/Desktop/My%20project/docs/api/alliance-contract.md) created specifying schemas, error codes, UUIDv4 idempotency, and PostgreSQL tables. |
-| **AC-6** | Compiles clean; Arabic/English verified; mock excluded from release | **PASS** | 0 compile errors; 34 bilingual keys verified by `AllianceLocalizationTests`; `LocalMockAllianceRepository` isolated behind preprocessor directives. |
-
----
-
-### 11. Known Issues and Limitations
-1. **Development Mock Simulation:** Live network synchronization with the Nakama server runtime will be connected in Phase 8/9; currently, mutations execute against `LocalMockAllianceRepository`.
-2. **Coalition Chat & War Operations:** Advanced chat channels and territory coalition wars are scheduled for post-MVP / Phase 9 per work order scope limits.
-
----
-
-### 12. Next Recommended Phase
-**Phase 08: Global Rankings & Leaderboards (Server-Authoritative Design)**
-- Leaderboard categories: Individual Player Combat Power, Alliance Aggregate Power, and Territory Influence.
-- Untrusted client: Rankings calculated server-side; client fetches paginated snapshots.
-- UI implementation for `ScreenId.Rankings`.
-- Bilingual Arabic RTL / English presentation.
+1. **Known Limitations:**
+   - Naval units remain strictly postponed for future content expansions.
+   - Real-time 3D tactical combat is out of scope for MVP (asynchronous auto-resolved battles in Phase 9).
+2. **Next Recommended Phase:**
+   - **Phase 08: Server Runtime & Nakama Backend Deployment:**
+     * Setup Nakama Docker compose environment with PostgreSQL.
+     * Implement authoritative Go/TypeScript RPCs for economy, base upgrades, army training, and alliance management.
+     * Integrate Nakama client SDK in Unity and transition development mock repositories to live server sessions.

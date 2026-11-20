@@ -87,7 +87,7 @@ namespace KingWorldWar.Editor
             armyViewSo.ApplyModifiedPropertiesWithoutUndo();
 
             // 4. Configure Screen_Army UI
-            var screenArmyGo = GameObject.Find("Screen_Army");
+            var screenArmyGo = FindInScene("Screen_Army");
             if (screenArmyGo != null)
             {
                 var screenImg = screenArmyGo.GetComponent<Image>();
@@ -105,8 +105,8 @@ namespace KingWorldWar.Editor
             }
 
             // 5. Build ArmyScreenView & RecruitmentDrawer
-            var safeAreaGo = GameObject.Find("SafeAreaContainer");
-            var drawerGo = GameObject.Find("RecruitmentDrawer");
+            var safeAreaGo = FindInScene("SafeAreaContainer");
+            var drawerGo = FindInScene("RecruitmentDrawer");
             if (drawerGo == null && safeAreaGo != null)
             {
                 drawerGo = BuildRecruitmentDrawerUI(safeAreaGo.transform);
@@ -469,6 +469,21 @@ namespace KingWorldWar.Editor
             go.AddComponent<KwwButton>();
             CreateText(go.transform, "Text", text, 15f, Color.white, TextAlignmentOptions.Center, Vector2.zero, Vector2.one);
             return btn;
+        }
+
+        private static GameObject FindInScene(string name)
+        {
+            var scene = EditorSceneManager.GetActiveScene();
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                if (root.name == name) return root;
+                var found = root.GetComponentsInChildren<Transform>(true);
+                foreach (var t in found)
+                {
+                    if (t.name == name) return t.gameObject;
+                }
+            }
+            return null;
         }
     }
 }

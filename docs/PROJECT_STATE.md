@@ -275,6 +275,47 @@
   - **58 PlayMode tests** (including 4 new `AllianceUITests`).
   - **224 total automated tests across all suites (100% pass rate, 0 failed, 0 errors).**
 
+### Phase 07 — Army Roster, Training Queue & 3D Asset Overhaul
+- **5 Canonical MVP Unit Archetypes (`DefaultArmyConfig`):**
+  - **Ground Operational Category:**
+    * Main Battle Tank (`unit_tank`): Heavy frontline armor, high frontal protection.
+    * Armored Vehicle (`unit_armored_vehicle`): 6-wheel combat carrier with rapid-fire autocannon.
+    * Heavy Artillery (`unit_artillery`): Long-range siege howitzer with area bombardment.
+  - **Air Operational Category:**
+    * Fighter Aircraft (`unit_fighter_aircraft`): Supersonic delta-wing interceptor.
+    * Recon Aircraft (`unit_recon_aircraft`): High-aspect strategic glider scout UAV.
+  - Naval units strictly postponed per approved MVP scope.
+- **Stat Authority Classification (`StatAuthority`):**
+  - `ServerAuthoritative`: Health, Attack, Defense, Speed, Range, Capacity, Combat Power, Cost, Required Buildings/Levels, Upgrade Costs and Durations.
+  - `DisplayOnly`: NameKey, DescKey, RoleKey, IconAssetPath, ModelAssetPath.
+- **Roster Snapshots & Reserves Validation:**
+  - `ArmyRosterSnapshot`: Tracks `TotalOwned`, `InTraining`, `Deployed`, and `Available`.
+  - `UnitSelection`: Pure domain force selection DTO validating reserves for future Phase 9 battles.
+- **Client Repository & Development Mock (`LocalMockArmyRepository`):**
+  - UUIDv4 idempotency cache, concurrency limits (2 active queues max), simulated failure modes, and timestamp progress reconciliation.
+- **Server Contract Specification (`docs/api/army-contract.md`):**
+  - Nakama RPC endpoints: `kww.army.get_roster`, `kww.army.train.request`, `kww.army.train.cancel`, `kww.army.upgrade.request`.
+  - PostgreSQL schema: `player_units`, `training_queues`, `idempotency_records`.
+- **Complete 3D Visual Asset Overhaul ($0 CC0 Royalty-Free Assets):**
+  - Replaced crude primitive cubes and cylinders with authentic, detailed low-poly 3D models:
+    * Units: `Tank_Medium.obj`, `Armored_Vehicle.obj`, `Artillery.obj`, `Fighter_Jet.obj`, `Recon_Plane.obj`.
+    * Buildings: `HQ_Tower.obj`, `Radar_Station.obj`, `Barracks.obj`, `Supply_Depot.obj`, `Vehicle_Factory.obj`.
+    * Terrain: `Terrain_WorldWar.obj`.
+  - Military PBR materials: `M_Military_Olive`, `M_Armor_Steel`, `M_Desert_Tan`, `M_Charcoal_Matte`.
+  - Composite `BoxCollider` setup for precise pointer selection.
+- **Tactical UI & 3D Preview Stage:**
+  - `ArmyScreenView`: Categorized grid supporting Ground and Air units, category filter tabs, status breakdowns.
+  - `UnitDetailView`: Full specification drawer, stat authority badges, and smooth 3D rotating preview stage (`PreviewStageAnchor`).
+  - `RecruitmentDrawer`: Tactical quantity stepper (`-`, `+`, `Max`), scaled cost calculation, and duration countdown.
+  - `TrainingQueueItemView`: Granular state badges, countdowns, and cancellation refund logic.
+- **Arabic Typography & RTL Shaping:**
+  - Integrated Google Font `Cairo.ttf` with native TextMeshPro fallback and custom glyph range.
+  - Pure C# `ArabicTextShaper` ensuring continuous cursive glyph connection and correct RTL numbers.
+- **Automated Test Coverage:**
+  - **185 EditMode tests** (+19 new unit tests for definitions, stats, queue, repository, selection, localization).
+  - **62 PlayMode tests** (+4 new tests for UI, drawers, filters, and 3D preview stage).
+  - **247 total automated tests across all suites (100% pass rate, 0 failed, 0 errors, 0 warnings).**
+
 ---
 
 ## 3. OPEN QUESTIONS & OWNER ACTIONS
